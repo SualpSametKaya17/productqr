@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Viewer3D from "./viewer-3d";
+import HeritageExperience from "@/components/heritage/HeritageExperience";
+import { buildHotspots } from "@/components/heritage/lib/content";
 
 /* ── Types ─────────────────────────────────────────────────────── */
 type Language   = { id: string; code: string; name: string; nativeName: string; isDefault: boolean };
@@ -403,6 +405,10 @@ export default function LandingPage({ product, translation, allLanguages, slug }
   // CSS-3D fallback model shown inside the viewer when no photo is uploaded
   const fallbackModel = isGate ? <Gate3D /> : isColumn ? <Column3D /> : null;
 
+  // Premium WebGL heritage experience requires a real photo to display.
+  const primaryImage = images.find(i => i.isPrimary) ?? images[0] ?? null;
+  const useHeritage  = Boolean(primaryImage);
+
   const switchLang = (code: string) =>
     router.push(`/p/${slug}?lang=${code}`, { scroll: false });
 
@@ -425,8 +431,9 @@ export default function LandingPage({ product, translation, allLanguages, slug }
     <main style={{ background: "#faf7f2", minHeight: "100vh", WebkitFontSmoothing: "antialiased" }}>
       <style>{STYLES}</style>
 
-      {/* ── Language switcher (scroll preserved) ── */}
-      {allLanguages.length > 1 && (
+      {/* ── Language switcher (scroll preserved) ──
+          Hidden when the heritage experience renders its own selector. */}
+      {allLanguages.length > 1 && !useHeritage && (
         <div style={{
           position: "fixed", top: 16, right: 16, zIndex: 60,
           display: "flex", gap: 4, padding: 4,
@@ -461,14 +468,28 @@ export default function LandingPage({ product, translation, allLanguages, slug }
       )}
 
       {/* ════════════════════════════════════════
-          HERO — interactive 3D viewer (dark)
+          HERO — premium WebGL heritage experience
+          (falls back to the CSS-3D viewer when no photo exists)
           ════════════════════════════════════════ */}
-      <Viewer3D
-        title={translation.title}
-        location="Lefkoşa · Kıbrıs"
-        images={images.map(i => ({ id: i.id, url: i.url, alt: i.alt }))}
-        fallback={fallbackModel}
-      />
+      {useHeritage && primaryImage ? (
+        <HeritageExperience
+          imageUrl={primaryImage.url}
+          title={translation.title}
+          location="Lefkoşa · Kıbrıs"
+          languages={allLanguages.map(l => ({ code: l.code, label: l.code.toUpperCase() }))}
+          currentLang={langCode}
+          timeline={timeline}
+          hotspots={buildHotspots(slug, langCode)}
+          onLanguageChange={switchLang}
+        />
+      ) : (
+        <Viewer3D
+          title={translation.title}
+          location="Lefkoşa · Kıbrıs"
+          images={images.map(i => ({ id: i.id, url: i.url, alt: i.alt }))}
+          fallback={fallbackModel}
+        />
+      )}
 
       {/* ── Light title bar ── */}
       <section style={{ textAlign: "center", padding: "clamp(2.5rem,7vh,4.5rem) 1.5rem 0" }}>
