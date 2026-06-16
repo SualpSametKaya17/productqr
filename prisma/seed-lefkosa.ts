@@ -123,6 +123,21 @@ async function main() {
     },
   });
 
+  // Add Dikilitaş photo (static asset at /public/images/dikilitas.webp)
+  const existingImg = await prisma.productImage.findFirst({ where: { productId: dikilitas.id } });
+  if (!existingImg) {
+    await prisma.productImage.create({
+      data: {
+        productId: dikilitas.id,
+        url: "/images/dikilitas.webp",
+        alt: "Lefkoşa Dikilitaşı - Venedik Sütunu",
+        isPrimary: true,
+        order: 0,
+      },
+    });
+    console.log("Added Dikilitaş photo");
+  }
+
   console.log("Seeded:", girne.slug, dikilitas.slug);
 }
 
