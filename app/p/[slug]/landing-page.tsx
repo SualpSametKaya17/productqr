@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
+/* ── Types ───────────────────────────────────────────────────────── */
 type Language = {
   id: string;
   code: string;
@@ -38,9 +39,15 @@ type Props = {
   slug: string;
 };
 
-/* ── helpers ─────────────────────────────────────────────────────── */
+/* ── Content helpers ─────────────────────────────────────────────── */
+function getParagraphs(description: string): string[] {
+  // Try double-newline splits first; fall back to single newlines
+  const doubleSplit = description.split(/\n\n+/).map((p) => p.trim()).filter(Boolean);
+  if (doubleSplit.length > 1) return doubleSplit;
+  return description.split(/\n+/).map((p) => p.trim()).filter(Boolean);
+}
 
-function extractTimeline(description: string) {
+function extractTimeline(description: string): Array<{ year: string; text: string }> {
   const paras = description.split(/\n+/).map((p) => p.trim()).filter(Boolean);
   const seen = new Set<string>();
   return paras
@@ -57,80 +64,176 @@ function extractTimeline(description: string) {
     .sort((a, b) => parseInt(a.year) - parseInt(b.year));
 }
 
-function getParagraphs(description: string) {
-  return description.split(/\n+/).map((p) => p.trim()).filter(Boolean);
-}
-
-/* ── decorative SVG ornament ─────────────────────────────────────── */
-function Ornament({ size = 60 }: { size?: number }) {
+/* ── SVG Ornament ────────────────────────────────────────────────── */
+function Ornament({ size = 48 }: { size?: number }) {
   return (
-    <svg width={size} height={size} viewBox="0 0 60 60" fill="none" style={{ display: "block", margin: "0 auto" }}>
-      <path d="M30 4 L32 28 L56 30 L32 32 L30 56 L28 32 L4 30 L28 28 Z" fill="#c9a84c" opacity="0.8" />
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 60 60"
+      fill="none"
+      style={{ display: "block", margin: "0 auto" }}
+      aria-hidden="true"
+    >
+      <path
+        d="M30 4 L32 28 L56 30 L32 32 L30 56 L28 32 L4 30 L28 28 Z"
+        fill="#c9a84c"
+        opacity="0.85"
+      />
       <circle cx="30" cy="30" r="4" fill="#c9a84c" />
     </svg>
   );
 }
 
-/* ── timeline entry ──────────────────────────────────────────────── */
-function TimelineItem({ year, text, idx }: { year: string; text: string; idx: number }) {
+/* ── Diamond Divider ─────────────────────────────────────────────── */
+function GoldDivider({ width = 80 }: { width?: number }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "1rem",
+        justifyContent: "center",
+      }}
+    >
+      <div
+        style={{
+          height: 1,
+          width,
+          background: "linear-gradient(to right, transparent, #c9a84c)",
+        }}
+      />
+      <div
+        style={{
+          width: 8,
+          height: 8,
+          background: "#c9a84c",
+          transform: "rotate(45deg)",
+          flexShrink: 0,
+          boxShadow: "0 0 8px rgba(201,168,76,0.6)",
+        }}
+      />
+      <div
+        style={{
+          height: 1,
+          width,
+          background: "linear-gradient(to left, transparent, #c9a84c)",
+        }}
+      />
+    </div>
+  );
+}
+
+/* ── Timeline Card ───────────────────────────────────────────────── */
+function TimelineItem({
+  year,
+  text,
+  idx,
+}: {
+  year: string;
+  text: string;
+  idx: number;
+}) {
   const isLeft = idx % 2 === 0;
   return (
     <div
       style={{
         display: "flex",
         justifyContent: isLeft ? "flex-start" : "flex-end",
-        marginBottom: 40,
+        marginBottom: 44,
         position: "relative",
       }}
     >
-      {/* dot on the centre line */}
+      {/* Centre dot */}
       <div
         style={{
           position: "absolute",
           left: "50%",
-          top: 18,
+          top: 20,
           width: 14,
           height: 14,
           borderRadius: "50%",
           background: "#c9a84c",
-          border: "3px solid #0d0a06",
+          border: "3px solid #0d0d14",
           transform: "translateX(-50%)",
-          boxShadow: "0 0 12px rgba(201,168,76,0.7)",
+          boxShadow: "0 0 14px rgba(201,168,76,0.8)",
           zIndex: 2,
         }}
       />
+
       <div
-        className="lp-timeline-card"
+        className="sot-timeline-card"
         style={{
-          width: "calc(50% - 32px)",
-          background: "rgba(255,240,200,0.04)",
-          border: "1px solid rgba(201,168,76,0.2)",
+          width: "calc(50% - 36px)",
+          background: "rgba(201,168,76,0.03)",
+          border: "1px solid rgba(201,168,76,0.18)",
           borderRadius: 16,
-          padding: "22px 24px",
-          backdropFilter: "blur(6px)",
-          WebkitBackdropFilter: "blur(6px)",
+          padding: "24px 26px",
+          backdropFilter: "blur(8px)",
+          WebkitBackdropFilter: "blur(8px)",
         }}
       >
         <div
           style={{
-            fontSize: "1.75rem",
+            fontSize: "1.875rem",
             fontWeight: 700,
             color: "#c9a84c",
             marginBottom: 10,
-            textShadow: "0 0 20px rgba(201,168,76,0.4)",
             letterSpacing: "-0.02em",
+            fontFamily: "Georgia, serif",
+            textShadow: "0 0 24px rgba(201,168,76,0.4)",
           }}
         >
           {year}
         </div>
-        <p style={{ fontSize: "0.9rem", lineHeight: 1.75, color: "#c4b490", margin: 0 }}>{text}</p>
+        <p
+          style={{
+            fontSize: "0.9rem",
+            lineHeight: 1.8,
+            color: "#9a9088",
+            margin: 0,
+            fontFamily: "system-ui, -apple-system, sans-serif",
+          }}
+        >
+          {text}
+        </p>
       </div>
     </div>
   );
 }
 
-/* ── main component ──────────────────────────────────────────────── */
-export default function LandingPage({ product, translation, allLanguages, slug }: Props) {
+/* ── Section Header ──────────────────────────────────────────────── */
+function SectionHeader({ label }: { label: string }) {
+  return (
+    <div style={{ textAlign: "center", marginBottom: 60 }}>
+      <div className="sot-rotate" style={{ display: "inline-block", opacity: 0.25, marginBottom: 20 }}>
+        <Ornament size={36} />
+      </div>
+      <h2
+        style={{
+          fontSize: "clamp(1.1rem, 3vw, 1.4rem)",
+          fontWeight: 600,
+          color: "#f5f0e8",
+          margin: "0 0 16px",
+          letterSpacing: "0.25em",
+          textTransform: "uppercase",
+          fontFamily: "system-ui, -apple-system, sans-serif",
+        }}
+      >
+        {label}
+      </h2>
+      <GoldDivider width={40} />
+    </div>
+  );
+}
+
+/* ── Main Component ──────────────────────────────────────────────── */
+export default function LandingPage({
+  product,
+  translation,
+  allLanguages,
+  slug,
+}: Props) {
   const router = useRouter();
   const heroRef = useRef<HTMLDivElement>(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
@@ -139,13 +242,13 @@ export default function LandingPage({ product, translation, allLanguages, slug }
     product.images.find((i) => i.isPrimary) ?? product.images[0] ?? null
   );
 
-  /* mouse-track 3D tilt */
+  /* Mouse-track 3D tilt on hero */
   const onMouseMove = useCallback((e: MouseEvent) => {
     const el = heroRef.current;
     if (!el) return;
     const rect = el.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 18;
-    const y = ((e.clientY - rect.top) / rect.height - 0.5) * -10;
+    const x = ((e.clientX - rect.left) / rect.width - 0.5) * 14;
+    const y = ((e.clientY - rect.top) / rect.height - 0.5) * -8;
     setTilt({ x: y, y: x });
   }, []);
 
@@ -162,129 +265,108 @@ export default function LandingPage({ product, translation, allLanguages, slug }
     };
   }, [onMouseMove, onMouseLeave]);
 
-  /* scroll parallax */
+  /* Scroll parallax */
   useEffect(() => {
     const onScroll = () => setScrollY(window.scrollY);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  /* content parsing */
+  /* Content */
   const paragraphs = getParagraphs(translation.description);
   const leadParagraph = paragraphs[0] ?? "";
   const bodyParagraphs = paragraphs.slice(1);
   const timelineEvents = extractTimeline(translation.description);
-  const timelineSlugs = new Set(timelineEvents.map((e) => e.text));
-  const nonTimelineBody = bodyParagraphs.filter((p) => !timelineSlugs.has(p));
+  const timelineTexts = new Set(timelineEvents.map((e) => e.text));
+  const nonTimelineBody = bodyParagraphs.filter((p) => !timelineTexts.has(p));
 
   const langCode = translation.language.code;
+  const historyLabel = langCode === "tr" ? "Tarihçe" : "History";
+  const photosLabel = langCode === "tr" ? "Fotoğraflar" : "Gallery";
 
   return (
-    <div className="lp-root" style={{ background: "#0d0a06", color: "#f5e6c8", minHeight: "100vh" }}>
+    <div
+      className="lp-root"
+      style={{
+        background: "#0d0d14",
+        color: "#f5f0e8",
+        minHeight: "100vh",
+        position: "relative",
+      }}
+    >
 
-      {/* ══════ HERO ══════════════════════════════════════════════ */}
-      <section
-        ref={heroRef}
+      {/* ══════ BACKGROUND ORBS ══════════════════════════════════════ */}
+      <div
         style={{
-          minHeight: "100vh",
-          position: "relative",
+          position: "fixed",
+          inset: 0,
           overflow: "hidden",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
+          pointerEvents: "none",
+          zIndex: 0,
         }}
+        aria-hidden="true"
       >
-        {/* animated gradient bg */}
+        {/* Gold orb — top left */}
         <div
-          className="lp-bg"
+          className="sot-orb-a"
           style={{
             position: "absolute",
-            inset: 0,
-            background: "linear-gradient(-45deg, #0d0a06, #1c1408, #0d0b04, #180f05, #0d0a06)",
+            width: 700,
+            height: 700,
+            borderRadius: "50%",
+            background:
+              "radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 70%)",
+            top: "-15%",
+            left: "-15%",
+            filter: "blur(40px)",
           }}
         />
-
-        {/* floating colour orbs */}
+        {/* Purple orb — bottom right */}
         <div
-          className="lp-orb-a"
+          className="sot-orb-b"
           style={{
             position: "absolute",
             width: 500,
             height: 500,
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(201,168,76,0.35) 0%, transparent 70%)",
-            top: -150,
-            left: -150,
-            filter: "blur(60px)",
-            pointerEvents: "none",
+            background:
+              "radial-gradient(circle, rgba(100,80,180,0.07) 0%, transparent 70%)",
+            bottom: "5%",
+            right: "-8%",
+            filter: "blur(50px)",
           }}
         />
+        {/* Subtle gold — mid-right */}
         <div
-          className="lp-orb-b"
+          className="sot-orb-c"
           style={{
             position: "absolute",
             width: 350,
             height: 350,
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(139,26,26,0.4) 0%, transparent 70%)",
-            bottom: -80,
-            right: -60,
-            filter: "blur(60px)",
-            pointerEvents: "none",
+            background:
+              "radial-gradient(circle, rgba(201,168,76,0.05) 0%, transparent 70%)",
+            top: "45%",
+            left: "60%",
+            filter: "blur(35px)",
           }}
         />
-        <div
-          className="lp-orb-c"
-          style={{
-            position: "absolute",
-            width: 250,
-            height: 250,
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(201,168,76,0.25) 0%, transparent 70%)",
-            top: "40%",
-            left: "65%",
-            filter: "blur(40px)",
-            pointerEvents: "none",
-          }}
-        />
+      </div>
 
-        {/* subtle grid */}
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            backgroundImage:
-              "linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px)",
-            backgroundSize: "60px 60px",
-            transform: `translateY(${scrollY * 0.15}px)`,
-            pointerEvents: "none",
-          }}
-        />
+      {/* ══════ ALL CONTENT (above orbs) ══════════════════════════════ */}
+      <div style={{ position: "relative", zIndex: 1 }}>
 
-        {/* rotating ornament top-left */}
-        <div
-          className="lp-rotate"
-          style={{
-            position: "absolute",
-            top: 40,
-            left: 40,
-            opacity: 0.12,
-            pointerEvents: "none",
-          }}
-        >
-          <Ornament size={80} />
-        </div>
-
-        {/* ── language switcher ── */}
+        {/* ── Language Switcher ── */}
         <div
           style={{
-            position: "absolute",
-            top: 24,
-            right: 24,
+            position: "fixed",
+            top: "1.5rem",
+            right: "1.5rem",
+            zIndex: 50,
             display: "flex",
             gap: 8,
             flexWrap: "wrap",
-            zIndex: 10,
+            justifyContent: "flex-end",
           }}
         >
           {allLanguages.map((lang) => {
@@ -293,19 +375,24 @@ export default function LandingPage({ product, translation, allLanguages, slug }
               <button
                 key={lang.code}
                 onClick={() => router.push(`/p/${slug}?lang=${lang.code}`)}
+                aria-current={isActive ? "true" : undefined}
                 style={{
-                  padding: "7px 18px",
-                  borderRadius: 999,
-                  border: `1px solid ${isActive ? "#c9a84c" : "rgba(201,168,76,0.3)"}`,
-                  background: isActive ? "#c9a84c" : "rgba(13,10,6,0.6)",
-                  color: isActive ? "#0d0a06" : "#c9a84c",
-                  fontWeight: 600,
-                  fontSize: 13,
+                  padding: "0.4rem 1rem",
+                  borderRadius: 9999,
+                  border: `1px solid ${isActive ? "#c9a84c" : "rgba(201,168,76,0.4)"}`,
+                  background: isActive ? "#c9a84c" : "rgba(13,13,20,0.75)",
+                  color: isActive ? "#0d0d14" : "#c9a84c",
+                  fontWeight: isActive ? 700 : 400,
+                  fontSize: "0.8125rem",
                   cursor: "pointer",
-                  backdropFilter: "blur(8px)",
-                  WebkitBackdropFilter: "blur(8px)",
-                  transition: "all 0.25s",
-                  letterSpacing: "0.02em",
+                  backdropFilter: "blur(12px)",
+                  WebkitBackdropFilter: "blur(12px)",
+                  fontFamily: "system-ui, -apple-system, sans-serif",
+                  letterSpacing: "0.05em",
+                  transition: "all 0.2s",
+                  boxShadow: isActive
+                    ? "0 0 16px rgba(201,168,76,0.35)"
+                    : "0 2px 12px rgba(0,0,0,0.4)",
                 }}
               >
                 {lang.nativeName}
@@ -314,249 +401,541 @@ export default function LandingPage({ product, translation, allLanguages, slug }
           })}
         </div>
 
-        {/* ── 3D hero card ── */}
-        <div
-          className="lp-card-3d"
+        {/* ══════ HERO SECTION ══════════════════════════════════════ */}
+        <section
+          ref={heroRef}
           style={{
-            position: "relative",
-            zIndex: 2,
-            textAlign: "center",
-            padding: "0 24px",
-            maxWidth: 740,
-            width: "100%",
-            ["--tilt-x" as string]: `${tilt.x}deg`,
-            ["--tilt-y" as string]: `${tilt.y}deg`,
-          }}
-        >
-          {/* top gold line */}
-          <div className="lp-line" style={{ width: 60, height: 2, background: "linear-gradient(90deg, transparent, #c9a84c, transparent)", margin: "0 auto 28px" }} />
-
-          {/* star ornaments */}
-          <div style={{ display: "flex", justifyContent: "center", gap: 16, marginBottom: 20 }}>
-            {[0, 400, 800].map((delay) => (
-              <div
-                key={delay}
-                className="lp-star"
-                style={{
-                  width: 6,
-                  height: 6,
-                  borderRadius: "50%",
-                  background: "#c9a84c",
-                  animationDelay: `${delay}ms`,
-                }}
-              />
-            ))}
-          </div>
-
-          <h1
-            style={{
-              fontSize: "clamp(2.2rem, 7vw, 4.5rem)",
-              fontWeight: 700,
-              lineHeight: 1.1,
-              color: "#f5e6c8",
-              textShadow: "0 0 80px rgba(201,168,76,0.45), 0 4px 30px rgba(0,0,0,0.9)",
-              letterSpacing: "-0.02em",
-              margin: "0 0 8px",
-            }}
-          >
-            {translation.title}
-          </h1>
-
-          {/* subtitle / lead */}
-          <p
-            style={{
-              fontSize: "clamp(0.95rem, 2.2vw, 1.15rem)",
-              color: "#a89060",
-              fontStyle: "italic",
-              lineHeight: 1.7,
-              maxWidth: 600,
-              margin: "24px auto 0",
-            }}
-          >
-            {leadParagraph}
-          </p>
-
-          {/* bottom gold line */}
-          <div className="lp-line" style={{ width: 60, height: 2, background: "linear-gradient(90deg, transparent, #c9a84c, transparent)", margin: "28px auto 0" }} />
-        </div>
-
-        {/* scroll indicator */}
-        <div
-          className="lp-scroll"
-          style={{
-            position: "absolute",
-            bottom: 36,
-            left: "50%",
+            minHeight: "100vh",
             display: "flex",
             flexDirection: "column",
+            justifyContent: "center",
             alignItems: "center",
-            gap: 6,
-            pointerEvents: "none",
+            textAlign: "center",
+            padding: "7rem 2rem 5rem",
+            position: "relative",
+            overflow: "hidden",
           }}
         >
-          <span style={{ color: "#c9a84c", fontSize: 11, letterSpacing: "0.15em", opacity: 0.7 }}>
-            SCROLL
-          </span>
-          <svg width="16" height="24" viewBox="0 0 16 24" fill="none">
-            <rect x="1" y="1" width="14" height="22" rx="7" stroke="rgba(201,168,76,0.4)" strokeWidth="1.5" />
-            <rect x="6.5" y="5" width="3" height="6" rx="1.5" fill="#c9a84c" />
-          </svg>
-        </div>
-      </section>
-
-      {/* ══════ TIMELINE ══════════════════════════════════════════ */}
-      {timelineEvents.length > 0 && (
-        <section style={{ padding: "100px 20px", maxWidth: 900, margin: "0 auto" }}>
-          {/* section header */}
-          <div style={{ textAlign: "center", marginBottom: 70 }}>
-            <Ornament size={40} />
-            <h2
-              style={{
-                fontSize: "clamp(1.5rem, 4vw, 2.5rem)",
-                fontWeight: 600,
-                color: "#f5e6c8",
-                margin: "20px 0 8px",
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-              }}
-            >
-              {langCode === "tr" ? "Tarihçe" : "History"}
-            </h2>
-            <div style={{ width: 40, height: 1, background: "#c9a84c", margin: "0 auto", opacity: 0.6 }} />
-          </div>
-
-          {/* vertical line */}
-          <div style={{ position: "relative" }}>
-            <div
-              style={{
-                position: "absolute",
-                left: "50%",
-                top: 0,
-                bottom: 0,
-                width: 1,
-                background:
-                  "linear-gradient(to bottom, transparent, rgba(201,168,76,0.5) 10%, rgba(201,168,76,0.5) 90%, transparent)",
-                transform: "translateX(-50%)",
-                pointerEvents: "none",
-              }}
-            />
-            {timelineEvents.map((e, i) => (
-              <TimelineItem key={e.year} year={e.year} text={e.text} idx={i} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ══════ BODY CONTENT ══════════════════════════════════════ */}
-      {nonTimelineBody.length > 0 && (
-        <section
-          style={{
-            padding: "0 20px 80px",
-            maxWidth: 720,
-            margin: "0 auto",
-          }}
-        >
+          {/* Subtle scrolling grid */}
           <div
             style={{
-              background: "rgba(255,240,200,0.025)",
-              border: "1px solid rgba(201,168,76,0.12)",
-              borderRadius: 20,
-              padding: "40px 36px",
+              position: "absolute",
+              inset: 0,
+              backgroundImage:
+                "linear-gradient(rgba(201,168,76,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(201,168,76,0.03) 1px, transparent 1px)",
+              backgroundSize: "70px 70px",
+              transform: `translateY(${scrollY * 0.12}px)`,
+              pointerEvents: "none",
+            }}
+            aria-hidden="true"
+          />
+
+          {/* Rotating ornament — top-left */}
+          <div
+            className="sot-rotate"
+            style={{
+              position: "absolute",
+              top: 48,
+              left: 48,
+              opacity: 0.1,
+              pointerEvents: "none",
+            }}
+            aria-hidden="true"
+          >
+            <Ornament size={70} />
+          </div>
+
+          {/* Rotating ornament — bottom-right */}
+          <div
+            className="sot-rotate"
+            style={{
+              position: "absolute",
+              bottom: 80,
+              right: 48,
+              opacity: 0.07,
+              pointerEvents: "none",
+              animationDirection: "reverse",
+            }}
+            aria-hidden="true"
+          >
+            <Ornament size={55} />
+          </div>
+
+          {/* 3D Arch shape */}
+          <div
+            className="sot-arch-float"
+            style={{
+              position: "absolute",
+              top: "8%",
+              left: "50%",
+              width: 220,
+              height: 220,
+              border: "1.5px solid rgba(201,168,76,0.2)",
+              borderRadius: "50% 50% 0 0",
+              pointerEvents: "none",
+            }}
+            aria-hidden="true"
+          />
+          <div
+            style={{
+              position: "absolute",
+              top: "8%",
+              left: "50%",
+              width: 180,
+              height: 180,
+              border: "1px solid rgba(201,168,76,0.1)",
+              borderRadius: "50% 50% 0 0",
+              transform: "translateX(-50%) translateY(20px)",
+              pointerEvents: "none",
+            }}
+            aria-hidden="true"
+          />
+
+          {/* Hero card with 3D mouse tilt */}
+          <div
+            className="sot-card-3d"
+            style={{
+              position: "relative",
+              zIndex: 2,
+              maxWidth: 760,
+              width: "100%",
+              ["--tilt-x" as string]: `${tilt.x}deg`,
+              ["--tilt-y" as string]: `${tilt.y}deg`,
             }}
           >
-            {nonTimelineBody.map((para, i) => (
-              <p
-                key={i}
-                style={{
-                  fontSize: "1rem",
-                  lineHeight: 1.95,
-                  color: i === nonTimelineBody.length - 1 ? "#c9a84c" : "#c4b490",
-                  fontStyle: i === nonTimelineBody.length - 1 ? "italic" : "normal",
-                  fontWeight: i === nonTimelineBody.length - 1 ? 600 : 400,
-                  marginBottom: i < nonTimelineBody.length - 1 ? 22 : 0,
-                }}
-              >
-                {para}
-              </p>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ══════ IMAGE GALLERY ══════════════════════════════════════ */}
-      {product.images.length > 0 && (
-        <section style={{ padding: "0 20px 100px", maxWidth: 900, margin: "0 auto" }}>
-          <div style={{ textAlign: "center", marginBottom: 40 }}>
-            <div style={{ width: 40, height: 1, background: "rgba(201,168,76,0.5)", margin: "0 auto 16px" }} />
-            <h2 style={{ fontSize: "1.1rem", color: "#a89060", letterSpacing: "0.15em", textTransform: "uppercase", margin: 0 }}>
-              {langCode === "tr" ? "Fotoğraflar" : "Photos"}
-            </h2>
-          </div>
-
-          {/* main image */}
-          {activeImg && (
+            {/* Gold accent line */}
             <div
-              className="lp-shimmer"
+              className="sot-line"
               style={{
-                position: "relative",
-                borderRadius: 20,
-                overflow: "hidden",
-                aspectRatio: "16 / 9",
-                border: "1px solid rgba(201,168,76,0.25)",
-                marginBottom: 16,
+                width: 60,
+                height: 2,
+                background: "linear-gradient(90deg, transparent, #c9a84c, transparent)",
+                margin: "0 auto 2rem",
+              }}
+            />
+
+            {/* Pulsing stars */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: 16,
+                marginBottom: 20,
               }}
             >
-              <Image
-                src={activeImg.url}
-                alt={activeImg.alt ?? translation.title}
-                fill
-                style={{ objectFit: "cover" }}
-              />
-            </div>
-          )}
-
-          {/* thumbnails */}
-          {product.images.length > 1 && (
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap", justifyContent: "center" }}>
-              {product.images.map((img) => (
-                <button
-                  key={img.id}
-                  onClick={() => setActiveImg(img)}
-                  className="lp-image-thumb"
+              {[0, 380, 760].map((delay) => (
+                <div
+                  key={delay}
+                  className="sot-star"
                   style={{
-                    width: 80,
-                    height: 60,
-                    borderRadius: 10,
-                    overflow: "hidden",
-                    border: `2px solid ${img.id === activeImg?.id ? "#c9a84c" : "rgba(201,168,76,0.2)"}`,
-                    position: "relative",
-                    cursor: "pointer",
-                    padding: 0,
-                    background: "none",
+                    width: 6,
+                    height: 6,
+                    borderRadius: "50%",
+                    background: "#c9a84c",
+                    animationDelay: `${delay}ms`,
                   }}
-                >
-                  <Image src={img.url} alt={img.alt ?? ""} fill style={{ objectFit: "cover" }} />
-                </button>
+                />
               ))}
             </div>
-          )}
-        </section>
-      )}
 
-      {/* ══════ FOOTER ════════════════════════════════════════════ */}
-      <footer
-        style={{
-          background: "#050302",
-          borderTop: "1px solid rgba(201,168,76,0.1)",
-          padding: "40px 24px",
-          textAlign: "center",
-        }}
-      >
-        <Ornament size={28} />
-        <p style={{ color: "#3d3020", fontSize: 11, letterSpacing: "0.12em", marginTop: 16 }}>
-          POWERED BY PRODUCTQR
-        </p>
-      </footer>
+            {/* Location badge */}
+            <span
+              style={{
+                fontSize: "0.7rem",
+                letterSpacing: "0.35em",
+                textTransform: "uppercase",
+                color: "#c9a84c",
+                marginBottom: "1rem",
+                display: "block",
+                fontFamily: "system-ui, -apple-system, sans-serif",
+                opacity: 0.85,
+              }}
+            >
+              Lefkoşa · Kuzey Kıbrıs
+            </span>
+
+            {/* Main title */}
+            <h1
+              className="sot-fade-up"
+              style={{
+                fontSize: "clamp(2.4rem, 7.5vw, 4.75rem)",
+                fontWeight: 700,
+                lineHeight: 1.05,
+                marginBottom: "1.5rem",
+                textShadow:
+                  "0 2px 4px rgba(0,0,0,0.6), 0 8px 32px rgba(0,0,0,0.9), 0 0 100px rgba(201,168,76,0.12)",
+                color: "#f5f0e8",
+                letterSpacing: "-0.02em",
+              }}
+            >
+              {translation.title}
+            </h1>
+
+            {/* Gold ornamental divider */}
+            <div style={{ margin: "0 0 2rem" }}>
+              <GoldDivider width={70} />
+            </div>
+
+            {/* Lead paragraph */}
+            {leadParagraph && (
+              <p
+                className="sot-fade-up-d"
+                style={{
+                  fontSize: "clamp(0.95rem, 2vw, 1.125rem)",
+                  color: "#a89468",
+                  fontStyle: "italic",
+                  lineHeight: 1.75,
+                  maxWidth: 580,
+                  margin: "0 auto",
+                  fontFamily: "Georgia, serif",
+                }}
+              >
+                {leadParagraph}
+              </p>
+            )}
+
+            {/* Bottom accent */}
+            <div
+              className="sot-line"
+              style={{
+                width: 60,
+                height: 2,
+                background: "linear-gradient(90deg, transparent, #c9a84c, transparent)",
+                margin: "2.5rem auto 0",
+              }}
+            />
+          </div>
+
+          {/* Scroll indicator */}
+          <div
+            className="sot-scroll"
+            style={{
+              position: "absolute",
+              bottom: "2.5rem",
+              left: "50%",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 6,
+              pointerEvents: "none",
+            }}
+            aria-hidden="true"
+          >
+            <span
+              style={{
+                color: "#c9a84c",
+                fontSize: 10,
+                letterSpacing: "0.2em",
+                opacity: 0.6,
+                fontFamily: "system-ui, sans-serif",
+              }}
+            >
+              SCROLL
+            </span>
+            <svg width="16" height="26" viewBox="0 0 16 26" fill="none">
+              <rect
+                x="1"
+                y="1"
+                width="14"
+                height="24"
+                rx="7"
+                stroke="rgba(201,168,76,0.35)"
+                strokeWidth="1.5"
+              />
+              <rect x="6.5" y="5" width="3" height="7" rx="1.5" fill="#c9a84c" />
+            </svg>
+          </div>
+        </section>
+
+        {/* ══════ IMAGE GALLERY ══════════════════════════════════════ */}
+        {product.images.length > 0 && (
+          <section
+            style={{
+              padding: "3rem 1.5rem 5rem",
+              maxWidth: 900,
+              margin: "0 auto",
+            }}
+          >
+            <SectionHeader label={photosLabel} />
+
+            {/* Main image — 3D card */}
+            {activeImg && (
+              <div
+                className="sot-img-card sot-pulse-gold"
+                style={{
+                  position: "relative",
+                  borderRadius: 20,
+                  overflow: "hidden",
+                  aspectRatio: "16 / 9",
+                  border: "1px solid rgba(201,168,76,0.22)",
+                  marginBottom: 16,
+                  background: "#13131f",
+                }}
+              >
+                <Image
+                  src={activeImg.url}
+                  alt={activeImg.alt ?? translation.title}
+                  fill
+                  style={{ objectFit: "cover" }}
+                  priority
+                />
+                {/* Gold corner accents */}
+                {[
+                  { top: 12, left: 12 },
+                  { top: 12, right: 12 },
+                  { bottom: 12, left: 12 },
+                  { bottom: 12, right: 12 },
+                ].map((pos, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      position: "absolute",
+                      width: 20,
+                      height: 20,
+                      borderTop: i < 2 ? "2px solid rgba(201,168,76,0.5)" : undefined,
+                      borderBottom: i >= 2 ? "2px solid rgba(201,168,76,0.5)" : undefined,
+                      borderLeft: i % 2 === 0 ? "2px solid rgba(201,168,76,0.5)" : undefined,
+                      borderRight: i % 2 === 1 ? "2px solid rgba(201,168,76,0.5)" : undefined,
+                      ...pos,
+                    }}
+                    aria-hidden="true"
+                  />
+                ))}
+              </div>
+            )}
+
+            {/* Thumbnails */}
+            {product.images.length > 1 && (
+              <div
+                style={{
+                  display: "flex",
+                  gap: 10,
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  marginTop: 12,
+                }}
+              >
+                {product.images.map((img) => {
+                  const isActive = img.id === activeImg?.id;
+                  return (
+                    <button
+                      key={img.id}
+                      onClick={() => setActiveImg(img)}
+                      className="sot-thumb"
+                      style={{
+                        width: 80,
+                        height: 58,
+                        borderRadius: 10,
+                        overflow: "hidden",
+                        border: `2px solid ${isActive ? "#c9a84c" : "rgba(201,168,76,0.15)"}`,
+                        position: "relative",
+                        cursor: "pointer",
+                        padding: 0,
+                        background: "#13131f",
+                        boxShadow: isActive
+                          ? "0 0 14px rgba(201,168,76,0.4)"
+                          : "none",
+                      }}
+                      aria-label={img.alt ?? `Image ${img.id}`}
+                      aria-pressed={isActive}
+                    >
+                      <Image
+                        src={img.url}
+                        alt={img.alt ?? ""}
+                        fill
+                        style={{ objectFit: "cover" }}
+                      />
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* ══════ HISTORY TIMELINE ══════════════════════════════════ */}
+        {timelineEvents.length > 0 && (
+          <section
+            style={{
+              padding: "2rem 1.5rem 5rem",
+              maxWidth: 860,
+              margin: "0 auto",
+            }}
+          >
+            <SectionHeader label={historyLabel} />
+
+            {/* Vertical centre line */}
+            <div style={{ position: "relative" }}>
+              <div
+                style={{
+                  position: "absolute",
+                  left: "50%",
+                  top: 0,
+                  bottom: 0,
+                  width: 1,
+                  background:
+                    "linear-gradient(to bottom, transparent, rgba(201,168,76,0.4) 8%, rgba(201,168,76,0.4) 92%, transparent)",
+                  transform: "translateX(-50%)",
+                  pointerEvents: "none",
+                }}
+                aria-hidden="true"
+              />
+              {timelineEvents.map((e, i) => (
+                <TimelineItem key={e.year} year={e.year} text={e.text} idx={i} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* ══════ STORY / BODY PARAGRAPHS ═══════════════════════════ */}
+        {nonTimelineBody.length > 0 && (
+          <section
+            style={{
+              maxWidth: 700,
+              margin: "0 auto",
+              padding: "2rem 1.5rem 6rem",
+            }}
+          >
+            <div
+              style={{
+                background: "rgba(201,168,76,0.025)",
+                border: "1px solid rgba(201,168,76,0.1)",
+                borderRadius: 20,
+                padding: "40px 36px",
+              }}
+            >
+              {nonTimelineBody.map((para, i) => {
+                const isLast = i === nonTimelineBody.length - 1;
+                const isFirst = i === 0;
+                return (
+                  <div
+                    key={i}
+                    style={{
+                      marginBottom: isLast ? 0 : "2.25rem",
+                      paddingLeft: "1.25rem",
+                      borderLeft: isFirst
+                        ? "2px solid #c9a84c"
+                        : "2px solid rgba(201,168,76,0.12)",
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontSize: "1.0rem",
+                        lineHeight: 1.9,
+                        color: isLast ? "#c9a84c" : isFirst ? "#e8dcc8" : "#9a9088",
+                        fontStyle: isLast ? "italic" : "normal",
+                        fontWeight: isLast ? 600 : 400,
+                        margin: 0,
+                        fontFamily: "system-ui, -apple-system, sans-serif",
+                      }}
+                    >
+                      {para}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* If no timeline and no body, show all paragraphs in story section */}
+        {timelineEvents.length === 0 && nonTimelineBody.length === 0 && paragraphs.length > 1 && (
+          <section
+            style={{
+              maxWidth: 700,
+              margin: "0 auto",
+              padding: "2rem 1.5rem 6rem",
+            }}
+          >
+            <div
+              style={{
+                background: "rgba(201,168,76,0.025)",
+                border: "1px solid rgba(201,168,76,0.1)",
+                borderRadius: 20,
+                padding: "40px 36px",
+              }}
+            >
+              {paragraphs.slice(1).map((para, i, arr) => {
+                const isLast = i === arr.length - 1;
+                const isFirst = i === 0;
+                return (
+                  <div
+                    key={i}
+                    style={{
+                      marginBottom: isLast ? 0 : "2.25rem",
+                      paddingLeft: "1.25rem",
+                      borderLeft: isFirst
+                        ? "2px solid #c9a84c"
+                        : "2px solid rgba(201,168,76,0.12)",
+                    }}
+                  >
+                    <p
+                      style={{
+                        fontSize: "1.0rem",
+                        lineHeight: 1.9,
+                        color: isFirst ? "#e8dcc8" : "#9a9088",
+                        margin: 0,
+                        fontFamily: "system-ui, -apple-system, sans-serif",
+                      }}
+                    >
+                      {para}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* ══════ FOOTER ════════════════════════════════════════════ */}
+        <footer
+          style={{
+            background: "#0a0a11",
+            borderTop: "1px solid rgba(201,168,76,0.12)",
+            padding: "4rem 2rem",
+            textAlign: "center",
+          }}
+        >
+          {/* QR Code */}
+          <div style={{ marginBottom: "2rem" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/api/qr/${product.slug}`}
+              alt="QR Code"
+              width={120}
+              height={120}
+              style={{
+                width: 120,
+                height: 120,
+                borderRadius: "0.75rem",
+                border: "1px solid rgba(201,168,76,0.2)",
+                display: "inline-block",
+                filter: "invert(1) sepia(0.1)",
+                boxShadow: "0 0 30px rgba(201,168,76,0.08)",
+              }}
+            />
+          </div>
+
+          {/* Ornament */}
+          <div style={{ marginBottom: "1.25rem" }}>
+            <Ornament size={24} />
+          </div>
+
+          {/* Location tag */}
+          <p
+            style={{
+              color: "#2e2e42",
+              fontSize: "0.7rem",
+              fontFamily: "system-ui, -apple-system, sans-serif",
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              margin: 0,
+            }}
+          >
+            Lefkoşa Turizm
+          </p>
+        </footer>
+      </div>
     </div>
   );
 }
