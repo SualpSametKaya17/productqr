@@ -27,7 +27,7 @@ export function Model3D({
   const { scene, animations } = useGLTF(modelUrl);
   const { actions } = useAnimations(animations, floatRef);
 
-  /* Warm limestone material for models that ship without textures. */
+  /* Warm limestone fallback for meshes that ship without a texture. */
   const stoneMaterial = useMemo(
     () =>
       new THREE.MeshStandardMaterial({
@@ -39,15 +39,12 @@ export function Model3D({
     []
   );
 
-  /* Normalize (center + uniform scale) and dress the meshes once. */
-  const { normalized, modelHeight } = useMemo(() => {
-    const root = scene;
-
-    root.traverse((obj) => {
+  /* Fix normals, dress untextured meshes, enable shadows. */
+  useEffect(() => {
+    scene.traverse((obj) => {
       const mesh = obj as THREE.Mesh;
       if (!mesh.isMesh) return;
 
-      // Meshy raw exports often lack normals — compute them for lighting.
       if (!mesh.geometry.attributes.normal) {
         mesh.geometry.computeVertexNormals();
       }
@@ -60,28 +57,24 @@ export function Model3D({
         mesh.material = stoneMaterial;
       } else if (mat) {
         mat.envMapIntensity = 1;
+        if (mat.map) mat.map.colorSpace = THREE.SRGBColorSpace;
+        mat.needsUpdate = true;
       }
 
       mesh.castShadow = true;
       mesh.receiveShadow = true;
     });
-
-    // Center at origin and scale so its height == TARGET_HEIGHT.
-    const box = new THREE.Box3().setFromObject(root);
-    const size = new THREE.Vector3();
-    const center = new THREE.Vector3();
-    box.getSize(size);
-    box.getCenter(center);
-
-    const scale = TARGET_HEIGHT / (size.y || 1);
-
-    const wrapper = new THREE.Group();
-    root.position.sub(center); // recenter
-    wrapper.add(root);
-    wrapper.scale.setScalar(scale);
-
-    return { normalized: wrapper, modelHeight: TARGET_HEIGHT };
   }, [scene, stoneMaterial]);
+
+  /* Center at origin + uniform scale so height == TARGET_HEIGHT. */
+  const { scale, center } = useMemo(() => {
+    const box = new THREE.Box3().setFromObject(scene);
+    const size = new THREE.Vector3();
+    const c = new THREE.Vector3();
+    box.getSize(size);
+    box.getCenter(c);
+    return { scale: TARGET_HEIGHT / (size.y || 1), center: c };
+  }, [scene]);
 
   /* Play any embedded animations. */
   useEffect(() => {
@@ -90,32 +83,35 @@ export function Model3D({
     return () => list.forEach((a) => a?.fadeOut(0.3));
   }, [actions]);
 
-  /* Cinematic float + very slow idle drift. */
+  /* Cinematic float. */
   useFrame((state) => {
     if (!floatRef.current) return;
-    const t = state.clock.elapsedTime;
-    floatRef.current.position.y = Math.sin(t * 0.55) * 0.07;
+    floatRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.55) * 0.07;
   });
 
   /* Arrange hotspots in a frontal arc around the monument. */
   const placed = hotspots.map((h, i) => {
-    const n = Math.max(hotspots.length, 1);
-    const angle = -0.9 + (i / Math.max(n - 1, 1)) * 1.8; // front ~±100°
-    const radius = modelHeight * 0.34;
-    const y = modelHeight * (0.42 - (i / Math.max(n - 1, 1)) * 0.78);
+    const n = Math.max(hotspots.length - 1, 1);
+    const angle = -0.9 + (i / n) * 1.8; // front ~±100°
+    const radius = TARGET_HEIGHT * 0.34;
+    const y = TARGET_HEIGHT * (0.42 - (i / n) * 0.78);
     return {
       ...h,
-      pos: [
-        Math.sin(angle) * radius,
-        y,
-        Math.cos(angle) * radius,
-      ] as [number, number, number],
+      pos: [Math.sin(angle) * radius, y, Math.cos(angle) * radius] as [
+        number,
+        number,
+        number,
+      ],
     };
   });
 
   return (
     <group ref={floatRef}>
-      <primitive object={normalized} />
+      <group scale={scale}>
+        <group position={[-center.x, -center.y, -center.z]}>
+          <primitive object={scene} />
+        </group>
+      </group>
 
       {placed.map((h) => (
         <Hotspot3D

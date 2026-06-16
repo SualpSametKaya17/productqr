@@ -2,6 +2,7 @@
 
 import { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
+import { AdaptiveDpr, AdaptiveEvents, Preload } from "@react-three/drei";
 import * as THREE from "three";
 import { Diorama } from "./Diorama";
 import { Model3D } from "./Model3D";
@@ -39,11 +40,12 @@ export default function HeritageScene({
 }: Props) {
   return (
     <Canvas
-      shadows
-      dpr={[1, 2]}
+      dpr={[1, 1.75]}
       camera={{ position: [0, 1.2, 8.5], fov: 38, near: 0.1, far: 100 }}
+      performance={{ min: 0.5 }}
       gl={{
         antialias: true,
+        powerPreference: "high-performance",
         toneMapping: THREE.ACESFilmicToneMapping,
         toneMappingExposure: 1.1,
       }}
@@ -80,6 +82,11 @@ export default function HeritageScene({
         onFocusChange={onFocusChange}
       />
       <PostFX focused={focused} />
+
+      {/* Perf: drop resolution while interacting, throttle events, preload. */}
+      <AdaptiveDpr pixelated={false} />
+      <AdaptiveEvents />
+      <Preload all />
     </Canvas>
   );
 }
