@@ -232,106 +232,68 @@ function Column3D() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ORNAMENTAL FRAME — museum-quality heritage border
+   FRAME — modern elevated heritage panel
    ═══════════════════════════════════════════════════════════════ */
-const FRAME_G  = "#9c6b3f";
-const FRAME_GL = "rgba(156,107,63,0.45)";
-const FRAME_GB = "rgba(156,107,63,0.22)";
+const FRAME_G = "#9c6b3f";
 
-/* Corner SVG — top-left orientation; CSS mirrors handle other corners */
-function FrameCorner() {
+/* Minimal viewfinder-style corner bracket (thin L). */
+function FrameCorner({ corner }: { corner: "tl" | "tr" | "bl" | "br" }) {
+  const L = 26, T = 1.5, off = 16;
+  const pos: React.CSSProperties =
+    corner === "tl" ? { top: off, left: off } :
+    corner === "tr" ? { top: off, right: off } :
+    corner === "bl" ? { bottom: off, left: off } :
+                      { bottom: off, right: off };
+  const vert = corner === "tl" || corner === "tr" ? "top" : "bottom";
+  const horz = corner === "tl" || corner === "bl" ? "left" : "right";
   return (
-    <svg width="66" height="66" viewBox="0 0 66 66" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* L-shaped bracket lines */}
-      <line x1="9" y1="9" x2="9" y2="58" stroke={FRAME_G} strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="9" y1="9" x2="58" y2="9" stroke={FRAME_G} strokeWidth="1.5" strokeLinecap="round"/>
-      {/* Diamond at the corner apex */}
-      <rect x="4.5" y="4.5" width="9" height="9" transform="rotate(45 9 9)" fill={FRAME_G}/>
-      {/* End circles */}
-      <circle cx="9"  cy="58" r="2.5" fill={FRAME_G} opacity="0.65"/>
-      <circle cx="58" cy="9"  r="2.5" fill={FRAME_G} opacity="0.65"/>
-      {/* Short accent ticks */}
-      <line x1="9"  y1="25" x2="18" y2="25" stroke={FRAME_GL} strokeWidth="1.1"/>
-      <line x1="25" y1="9"  x2="25" y2="18" stroke={FRAME_GL} strokeWidth="1.1"/>
-      <line x1="9"  y1="40" x2="15" y2="40" stroke={FRAME_GL} strokeWidth="0.8"/>
-      <line x1="40" y1="9"  x2="40" y2="15" stroke={FRAME_GL} strokeWidth="0.8"/>
-    </svg>
-  );
-}
-
-/* Small diamond used in the centre-top ornament */
-function FrameCentreDiamond() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <rect x="3.8" y="3.8" width="10.4" height="10.4" transform="rotate(45 9 9)" fill={FRAME_G}/>
-      <rect x="5.8" y="5.8" width="6.4"  height="6.4"  transform="rotate(45 9 9)" fill="#faf7f2"/>
-    </svg>
+    <div style={{ position: "absolute", width: L, height: L, pointerEvents: "none", ...pos }}>
+      {/* horizontal arm */}
+      <div style={{
+        position: "absolute", [vert]: 0, [horz]: 0,
+        width: L, height: T, background: FRAME_G, opacity: 0.55, borderRadius: 2,
+      } as React.CSSProperties} />
+      {/* vertical arm */}
+      <div style={{
+        position: "absolute", [vert]: 0, [horz]: 0,
+        width: T, height: L, background: FRAME_G, opacity: 0.55, borderRadius: 2,
+      } as React.CSSProperties} />
+    </div>
   );
 }
 
 function OrnamentalFrame({ children }: { children: React.ReactNode }) {
-  const GB = FRAME_GB;
-  const G  = FRAME_G;
-
   return (
     <div style={{
-      position: "relative",
-      maxWidth: 740,
+      maxWidth: 760,
       margin: "0 auto",
-      padding: "0 clamp(1.2rem, 5vw, 3.5rem)",
-      overflow: "visible",
+      padding: "0 clamp(0.9rem, 4vw, 2rem)",
     }}>
-      {/* Thin connecting border — sits behind the corner ornaments */}
       <div style={{
-        position: "absolute",
-        inset: "9px 9px",
-        border: `1px solid ${GB}`,
-        pointerEvents: "none",
-      }} />
-
-      {/* ── Corner ornaments ── */}
-      <div style={{ position: "absolute", top: -4, left: -4 }}>
-        <FrameCorner />
-      </div>
-      <div style={{ position: "absolute", top: -4, right: -4, transform: "scaleX(-1)" }}>
-        <FrameCorner />
-      </div>
-      <div style={{ position: "absolute", bottom: -4, left: -4, transform: "scaleY(-1)" }}>
-        <FrameCorner />
-      </div>
-      <div style={{ position: "absolute", bottom: -4, right: -4, transform: "scale(-1,-1)" }}>
-        <FrameCorner />
-      </div>
-
-      {/* ── Centre-top ornament (sits on the top border line) ── */}
-      <div style={{
-        position: "absolute", top: 0, left: "50%",
-        transform: "translateX(-50%) translateY(-50%)",
-        display: "flex", alignItems: "center", gap: 8,
-        background: "#faf7f2", padding: "0 10px",
-        marginTop: 9,
+        position: "relative",
+        borderRadius: 28,
+        background: "linear-gradient(180deg, #fffdf9 0%, #faf7f2 100%)",
+        border: "1px solid rgba(156,107,63,0.14)",
+        boxShadow:
+          "0 1px 0 rgba(255,255,255,0.7) inset, 0 18px 50px -28px rgba(80,55,20,0.32), 0 4px 14px -8px rgba(80,55,20,0.12)",
+        overflow: "hidden",
       }}>
-        <div style={{ width: 34, height: 1, background: GB }}/>
-        <FrameCentreDiamond />
-        <div style={{ width: 34, height: 1, background: GB }}/>
-      </div>
+        {/* Slim gold accent bar across the very top */}
+        <div style={{
+          position: "absolute", top: 0, left: 0, right: 0, height: 3,
+          background: "linear-gradient(90deg, transparent, rgba(156,107,63,0.85) 50%, transparent)",
+        }} />
 
-      {/* ── Centre-bottom ornament ── */}
-      <div style={{
-        position: "absolute", bottom: 0, left: "50%",
-        transform: "translateX(-50%) translateY(50%)",
-        display: "flex", alignItems: "center", gap: 8,
-        background: "#faf7f2", padding: "0 10px",
-        marginBottom: 9,
-      }}>
-        <div style={{ width: 34, height: 1, background: GB }}/>
-        <div style={{ width: 7, height: 7, background: G, transform: "rotate(45deg)", flexShrink: 0 }}/>
-        <div style={{ width: 34, height: 1, background: GB }}/>
-      </div>
+        {/* Viewfinder corner brackets */}
+        <FrameCorner corner="tl" />
+        <FrameCorner corner="tr" />
+        <FrameCorner corner="bl" />
+        <FrameCorner corner="br" />
 
-      {/* Content */}
-      <div style={{ padding: "clamp(2.8rem,7vh,5rem) 0 clamp(2.4rem,6vh,4rem)" }}>
-        {children}
+        {/* Content */}
+        <div style={{ padding: "clamp(2.6rem,6vh,4.5rem) clamp(1rem,4vw,2.4rem) clamp(2.4rem,5vh,3.5rem)" }}>
+          {children}
+        </div>
       </div>
     </div>
   );
