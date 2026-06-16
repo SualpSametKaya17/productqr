@@ -2,16 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Viewer3D from "./viewer-3d";
-import HeritageExperience from "@/components/heritage/HeritageExperience";
-import { buildHotspots, getReliefMaps, getModelUrl } from "@/components/heritage/lib/content";
 
 /* ── Types ─────────────────────────────────────────────────────── */
-type Language   = { id: string; code: string; name: string; nativeName: string; isDefault: boolean };
+type Language    = { id: string; code: string; name: string; nativeName: string; isDefault: boolean };
 type Translation = { title: string; description: string; language: Language };
 type ProductImage = { id: string; url: string; alt: string | null; isPrimary: boolean };
-type Product    = { id: string; slug: string; images: ProductImage[] };
-type Props      = { product: Product; translation: Translation; allLanguages: Language[]; slug: string };
+type Product     = { id: string; slug: string; images: ProductImage[] };
+type Props       = { product: Product; translation: Translation; allLanguages: Language[]; slug: string };
 
 /* ── Keyframe animations ───────────────────────────────────────── */
 const STYLES = `
@@ -26,14 +23,6 @@ const STYLES = `
   @keyframes colSpin {
     from { transform: rotateY(0deg); }
     to   { transform: rotateY(360deg); }
-  }
-  @keyframes fadeUp {
-    from { opacity:0; transform: translateY(22px); }
-    to   { opacity:1; transform: translateY(0); }
-  }
-  @keyframes bounce {
-    0%,100% { transform: translateX(-50%) translateY(0); }
-    50%      { transform: translateX(-50%) translateY(8px); }
   }
 `;
 
@@ -54,7 +43,7 @@ function extractTimeline(desc: string) {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   3D GATE — Girne Kapısı
+   3D GATE — Girne Kapısı (used in biblo card only)
    ═══════════════════════════════════════════════════════════════ */
 function Gate3D() {
   const W = 210, H = 268, D = 52;
@@ -62,17 +51,12 @@ function Gate3D() {
 
   return (
     <div style={{ perspective: 1000, perspectiveOrigin: "50% 42%", marginBottom: 8 }}>
-      {/* Outer wrapper holds the 3D animation */}
       <div style={{ display: "inline-block", transformStyle: "preserve-3d", animation: "gateFloat 8s ease-in-out infinite" }}>
-        {/* ── Container that holds all faces ── */}
         <div style={{ position: "relative", width: W, height: H, transformStyle: "preserve-3d" }}>
-
-          {/* FRONT FACE */}
           <div style={{
             position: "absolute", inset: 0,
             background: "linear-gradient(155deg, #dac8a8 0%, #c8b090 45%, #b89868 100%)",
           }}>
-            {/* Stone-block grid */}
             <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.18 }} aria-hidden>
               {[52, 104, 156, 208].map(y =>
                 <line key={y} x1="0" y1={y} x2={W} y2={y} stroke="#5c3c18" strokeWidth="2" />
@@ -84,8 +68,6 @@ function Gate3D() {
                 })
               )}
             </svg>
-
-            {/* Arch opening */}
             <div style={{
               position: "absolute",
               left: (W - AW) / 2, bottom: 0,
@@ -94,8 +76,6 @@ function Gate3D() {
               borderRadius: `${AW / 2}px ${AW / 2}px 0 0`,
               boxShadow: "inset 0 -4px 20px rgba(0,0,0,0.6)",
             }} />
-
-            {/* Arch keystone */}
             <div style={{
               position: "absolute",
               left: "50%", transform: "translateX(-50%)",
@@ -105,8 +85,6 @@ function Gate3D() {
               clipPath: "polygon(50% 0%, 100% 100%, 0% 100%)",
             }} />
           </div>
-
-          {/* RIGHT DEPTH WALL */}
           <div style={{
             position: "absolute", left: W, top: 0,
             width: D, height: H,
@@ -114,13 +92,10 @@ function Gate3D() {
             transformOrigin: "left center",
             transform: "rotateY(90deg)",
           }}>
-            {/* Stone blocks on depth wall */}
             <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.2 }} aria-hidden>
               {[52, 104, 156, 208].map(y => <line key={y} x1="0" y1={y} x2={D} y2={y} stroke="#3c2010" strokeWidth="1.5" />)}
             </svg>
           </div>
-
-          {/* TOP CORNICE */}
           <div style={{
             position: "absolute", left: -6, top: -20,
             width: W + 12, height: 24,
@@ -128,8 +103,6 @@ function Gate3D() {
             transformOrigin: "bottom center",
             boxShadow: "0 -4px 12px rgba(0,0,0,0.2)",
           }} />
-
-          {/* WATCHTOWER */}
           <div style={{
             position: "absolute",
             left: (W - 76) / 2,
@@ -138,7 +111,6 @@ function Gate3D() {
             height: 100,
             background: "linear-gradient(155deg, #d0b888 0%, #b49060 100%)",
           }}>
-            {/* Battlements */}
             {[2, 22, 42, 56].map(x => (
               <div key={x} style={{
                 position: "absolute", top: -18, left: x,
@@ -146,7 +118,6 @@ function Gate3D() {
                 background: "#b49060",
               }} />
             ))}
-            {/* Window */}
             <div style={{
               position: "absolute",
               left: "50%", transform: "translateX(-50%)",
@@ -154,25 +125,12 @@ function Gate3D() {
               background: "#100c06",
               borderRadius: "10px 10px 0 0",
             }} />
-            {/* MDLXII inscription */}
             <div style={{
               position: "absolute", bottom: 8, width: "100%",
               textAlign: "center", fontSize: 8, letterSpacing: "0.06em",
               color: "#e8d4a8", fontFamily: "Georgia, serif", opacity: 0.9,
             }}>MDLXII</div>
-            {/* Tower stone blocks */}
-            <svg style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.12 }} aria-hidden>
-              {[30, 60, 90].map(y => <line key={y} x1="0" y1={y} x2="76" y2={y} stroke="#5c3c18" strokeWidth="1.5" />)}
-              {[0, 38, 76].map((x, col) =>
-                [0, 30, 60, 90].map((y, row) => {
-                  const ox = row % 2 === 0 ? 0 : 19;
-                  return <line key={`${col}-${row}`} x1={x + ox} y1={y} x2={x + ox} y2={y + 30} stroke="#5c3c18" strokeWidth="1" />;
-                })
-              )}
-            </svg>
           </div>
-
-          {/* GROUND SHADOW */}
           <div style={{
             position: "absolute", bottom: -28, left: "5%",
             width: "90%", height: 28,
@@ -186,7 +144,7 @@ function Gate3D() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   3D COLUMN — Lefkoşa Dikilitaşı
+   3D COLUMN — Lefkoşa Dikilitaşı (used in biblo card only)
    ═══════════════════════════════════════════════════════════════ */
 function Column3D() {
   const FACES = 12, R = 26, SH = 210;
@@ -195,30 +153,22 @@ function Column3D() {
     <div style={{ perspective: 900, perspectiveOrigin: "50% 36%", marginBottom: 8 }}>
       <div style={{ display: "inline-block", transformStyle: "preserve-3d", animation: "colFloat 7s ease-in-out infinite" }}>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", transformStyle: "preserve-3d" }}>
-
-          {/* Bronze sphere */}
           <div style={{
             width: 44, height: 44, borderRadius: "50%", zIndex: 2, marginBottom: -2,
             background: "radial-gradient(circle at 33% 28%, #f4d878, #c8962a 48%, #7a5018 100%)",
             boxShadow: "0 6px 32px rgba(200,150,40,0.55), 0 2px 8px rgba(0,0,0,0.45)",
           }} />
-
-          {/* Abacus (wide flat top of capital) */}
           <div style={{
             width: 130, height: 14,
             background: "linear-gradient(180deg, #d4bea0 0%, #b89a72 100%)",
             borderRadius: "3px 3px 0 0",
             boxShadow: "0 4px 16px rgba(0,0,0,0.28)",
           }} />
-
-          {/* Echinus (curved capital body) */}
           <div style={{
             width: 110, height: 18,
             background: "linear-gradient(180deg, #c8b28c 0%, #a88e68 100%)",
             boxShadow: "0 3px 10px rgba(0,0,0,0.2)",
           }} />
-
-          {/* Shaft — spinning polygonal prism */}
           <div style={{
             position: "relative",
             width: R * 2, height: SH,
@@ -237,7 +187,6 @@ function Column3D() {
                   transform: `translateX(-50%) rotateY(${angle}deg) translateZ(${R}px)`,
                   backfaceVisibility: "hidden",
                 }}>
-                  {/* Fluting groove */}
                   <div style={{
                     position: "absolute", left: "50%", top: 6, bottom: 6,
                     width: 1, background: "rgba(0,0,0,0.14)",
@@ -246,37 +195,24 @@ function Column3D() {
               );
             })}
           </div>
-
-          {/* Neck */}
-          <div style={{
-            width: 60, height: 10,
-            background: "linear-gradient(180deg, #c0a880 0%, #a08860 100%)",
-          }} />
-
-          {/* Stylobate top */}
+          <div style={{ width: 60, height: 10, background: "linear-gradient(180deg, #c0a880 0%, #a08860 100%)" }} />
           <div style={{
             width: 128, height: 22,
             background: "linear-gradient(180deg, #b8a07a 0%, #9a8060 100%)",
             borderRadius: "0 0 2px 2px",
             boxShadow: "0 4px 14px rgba(0,0,0,0.25)",
           }} />
-
-          {/* Stylobate middle */}
           <div style={{
             width: 148, height: 22,
             background: "linear-gradient(180deg, #a89070 0%, #887050 100%)",
             boxShadow: "0 5px 16px rgba(0,0,0,0.28)",
           }} />
-
-          {/* Stylobate base */}
           <div style={{
             width: 170, height: 28,
             background: "linear-gradient(180deg, #9a8068 0%, #7a6048 100%)",
             borderRadius: "0 0 4px 4px",
             boxShadow: "0 10px 32px rgba(0,0,0,0.42)",
           }} />
-
-          {/* Shadow */}
           <div style={{
             width: 220, height: 24, marginTop: 6,
             background: "radial-gradient(ellipse, rgba(0,0,0,0.32) 0%, transparent 80%)",
@@ -289,10 +225,106 @@ function Column3D() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   MAIN COMPONENT
+   ORNAMENTAL FRAME — museum-quality heritage border
    ═══════════════════════════════════════════════════════════════ */
+function OrnamentalFrame({ children }: { children: React.ReactNode }) {
+  const G  = "#9c6b3f";
+  const GL = "rgba(156,107,63,0.45)";
+  const GB = "rgba(156,107,63,0.22)";
+
+  /* Corner SVG — top-left orientation; mirrors handle other corners */
+  const Corner = () => (
+    <svg width="66" height="66" viewBox="0 0 66 66" fill="none" xmlns="http://www.w3.org/2000/svg">
+      {/* L-shaped bracket lines */}
+      <line x1="9" y1="9" x2="9" y2="58" stroke={G} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="9" y1="9" x2="58" y2="9" stroke={G} strokeWidth="1.5" strokeLinecap="round"/>
+      {/* Diamond at the corner apex */}
+      <rect x="4.5" y="4.5" width="9" height="9" transform="rotate(45 9 9)" fill={G}/>
+      {/* End circles */}
+      <circle cx="9"  cy="58" r="2.5" fill={G} opacity="0.65"/>
+      <circle cx="58" cy="9"  r="2.5" fill={G} opacity="0.65"/>
+      {/* Short accent ticks */}
+      <line x1="9"  y1="25" x2="18" y2="25" stroke={GL} strokeWidth="1.1"/>
+      <line x1="25" y1="9"  x2="25" y2="18" stroke={GL} strokeWidth="1.1"/>
+      <line x1="9"  y1="40" x2="15" y2="40" stroke={GL} strokeWidth="0.8"/>
+      <line x1="40" y1="9"  x2="40" y2="15" stroke={GL} strokeWidth="0.8"/>
+    </svg>
+  );
+
+  /* Small diamond used in centre-edge ornaments */
+  const CentreDiamond = () => (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+      <rect x="3.8" y="3.8" width="10.4" height="10.4" transform="rotate(45 9 9)" fill={G}/>
+      <rect x="5.8" y="5.8" width="6.4"  height="6.4"  transform="rotate(45 9 9)" fill="#faf7f2"/>
+    </svg>
+  );
+
+  return (
+    <div style={{
+      position: "relative",
+      maxWidth: 740,
+      margin: "0 auto",
+      padding: "0 clamp(1.2rem, 5vw, 3.5rem)",
+      overflow: "visible",
+    }}>
+      {/* Thin connecting border — sits behind the corner ornaments */}
+      <div style={{
+        position: "absolute",
+        inset: "9px 9px",
+        border: `1px solid ${GB}`,
+        pointerEvents: "none",
+      }} />
+
+      {/* ── Corner ornaments ── */}
+      <div style={{ position: "absolute", top: -4, left: -4 }}>
+        <Corner />
+      </div>
+      <div style={{ position: "absolute", top: -4, right: -4, transform: "scaleX(-1)" }}>
+        <Corner />
+      </div>
+      <div style={{ position: "absolute", bottom: -4, left: -4, transform: "scaleY(-1)" }}>
+        <Corner />
+      </div>
+      <div style={{ position: "absolute", bottom: -4, right: -4, transform: "scale(-1,-1)" }}>
+        <Corner />
+      </div>
+
+      {/* ── Centre-top ornament (sits on the top border line) ── */}
+      <div style={{
+        position: "absolute", top: 0, left: "50%",
+        transform: "translateX(-50%) translateY(-50%)",
+        display: "flex", alignItems: "center", gap: 8,
+        background: "#faf7f2", padding: "0 10px",
+        marginTop: 9,
+      }}>
+        <div style={{ width: 34, height: 1, background: GB }}/>
+        <CentreDiamond />
+        <div style={{ width: 34, height: 1, background: GB }}/>
+      </div>
+
+      {/* ── Centre-bottom ornament ── */}
+      <div style={{
+        position: "absolute", bottom: 0, left: "50%",
+        transform: "translateX(-50%) translateY(50%)",
+        display: "flex", alignItems: "center", gap: 8,
+        background: "#faf7f2", padding: "0 10px",
+        marginBottom: 9,
+      }}>
+        <div style={{ width: 34, height: 1, background: GB }}/>
+        <div style={{ width: 7, height: 7, background: G, transform: "rotate(45deg)", flexShrink: 0 }}/>
+        <div style={{ width: 34, height: 1, background: GB }}/>
+      </div>
+
+      {/* Content */}
+      <div style={{ padding: "clamp(2.8rem,7vh,5rem) 0 clamp(2.4rem,6vh,4rem)" }}>
+        {children}
+      </div>
+    </div>
+  );
+}
+
 /* ═══════════════════════════════════════════════════════════════
-   BIBLO CARD — scroll ile açılan, kaldırılabilen hatıra biblosu kartı
+   BIBLO CARD
    ═══════════════════════════════════════════════════════════════ */
 function BibloCard({
   model, title, bibloImg, visible, onClose,
@@ -331,7 +363,6 @@ function BibloCard({
         borderRadius: 18,
         boxShadow: "0 24px 60px -18px rgba(60,40,15,0.45)",
       }}>
-        {/* Mini 3D figurine / biblo */}
         <div style={{
           flexShrink: 0,
           width: 96, height: 110,
@@ -349,8 +380,6 @@ function BibloCard({
             <div style={{ transform: "scale(0.24)", transformOrigin: "center" }}>{model}</div>
           )}
         </div>
-
-        {/* Text */}
         <div style={{ minWidth: 0, flex: 1 }}>
           <span style={{
             fontSize: "0.62rem", letterSpacing: "0.2em", textTransform: "uppercase",
@@ -369,8 +398,6 @@ function BibloCard({
             El yapımı koleksiyon biblosu
           </p>
         </div>
-
-        {/* Dismiss button */}
         <button
           onClick={onClose}
           title="Kartı kaldır"
@@ -392,36 +419,31 @@ function BibloCard({
   );
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   MAIN COMPONENT
+   ═══════════════════════════════════════════════════════════════ */
 export default function LandingPage({ product, translation, allLanguages, slug }: Props) {
-  const router    = useRouter();
-  const langCode  = translation.language.code;
+  const router     = useRouter();
+  const langCode   = translation.language.code;
   const paragraphs = getParagraphs(translation.description);
-  const timeline  = extractTimeline(translation.description);
-  const images    = product.images;
+  const timeline   = extractTimeline(translation.description);
+  const images     = product.images;
 
   const isGate   = slug === "girne-kapisi";
   const isColumn = slug === "lefkosa-dikilitas";
 
-  // CSS-3D fallback model shown inside the viewer when no photo is uploaded
   const fallbackModel = isGate ? <Gate3D /> : isColumn ? <Column3D /> : null;
-
-  // Premium WebGL heritage experience: shown when there is either a 3D
-  // model registered for this slug, or at least one photo to display.
-  const primaryImage = images.find(i => i.isPrimary) ?? images[0] ?? null;
-  const modelUrl     = getModelUrl(slug);
-  const useHeritage  = Boolean(modelUrl) || Boolean(primaryImage);
 
   const switchLang = (code: string) =>
     router.push(`/p/${slug}?lang=${code}`, { scroll: false });
 
-  /* ── Biblo card: aşağı kaydırınca aç, kullanıcı kaldırınca gizle ── */
-  const [bibloVisible, setBibloVisible] = useState(false);
+  const [bibloVisible,   setBibloVisible]   = useState(false);
   const [bibloDismissed, setBibloDismissed] = useState(false);
 
   useEffect(() => {
     if (bibloDismissed) return;
     const onScroll = () => {
-      const past = window.scrollY > window.innerHeight * 0.55;
+      const past = window.scrollY > window.innerHeight * 0.35;
       setBibloVisible(past && !bibloDismissed);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -433,9 +455,8 @@ export default function LandingPage({ product, translation, allLanguages, slug }
     <main style={{ background: "#faf7f2", minHeight: "100vh", WebkitFontSmoothing: "antialiased" }}>
       <style>{STYLES}</style>
 
-      {/* ── Language switcher (scroll preserved) ──
-          Hidden when the heritage experience renders its own selector. */}
-      {allLanguages.length > 1 && !useHeritage && (
+      {/* ── Language switcher ── */}
+      {allLanguages.length > 1 && (
         <div style={{
           position: "fixed", top: 16, right: 16, zIndex: 60,
           display: "flex", gap: 4, padding: 4,
@@ -470,117 +491,98 @@ export default function LandingPage({ product, translation, allLanguages, slug }
       )}
 
       {/* ════════════════════════════════════════
-          HERO — premium WebGL heritage experience
-          (falls back to the CSS-3D viewer when no photo exists)
+          TOP SPACER — clears the fixed language bar
           ════════════════════════════════════════ */}
-      {useHeritage ? (
-        <HeritageExperience
-          imageUrl={primaryImage?.url ?? ""}
-          modelUrl={modelUrl}
-          depthUrl={getReliefMaps(slug)?.depth}
-          normalUrl={getReliefMaps(slug)?.normal}
-          title={translation.title}
-          location="Lefkoşa · Kıbrıs"
-          languages={allLanguages.map(l => ({ code: l.code, label: l.code.toUpperCase() }))}
-          currentLang={langCode}
-          timeline={timeline}
-          hotspots={buildHotspots(slug, langCode)}
-          onLanguageChange={switchLang}
-        />
-      ) : (
-        <Viewer3D
-          title={translation.title}
-          location="Lefkoşa · Kıbrıs"
-          images={images.map(i => ({ id: i.id, url: i.url, alt: i.alt }))}
-          fallback={fallbackModel}
-        />
-      )}
-
-      {/* ── Light title bar ── */}
-      <section style={{ textAlign: "center", padding: "clamp(2.5rem,7vh,4.5rem) 1.5rem 0" }}>
-        <p style={{
-          margin: "0 0 1.2rem",
-          fontSize: "0.7rem", letterSpacing: "0.34em",
-          textTransform: "uppercase", color: "#9c6b3f",
-          fontWeight: 700, fontFamily: "system-ui, sans-serif",
-        }}>
-          Lefkoşa · Kuzey Kıbrıs
-        </p>
-        <h1 style={{
-          fontFamily: 'Georgia, "Times New Roman", serif',
-          fontWeight: 400,
-          fontSize: "clamp(2.1rem, 6vw, 3.8rem)",
-          lineHeight: 1.1, letterSpacing: "-0.01em",
-          color: "#1c1408", margin: 0,
-        }}>
-          {translation.title}
-        </h1>
-        <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginTop: "1.4rem" }}>
-          <div style={{ width: 52, height: 1, background: "rgba(156,107,63,0.4)" }} />
-          <div style={{ width: 6, height: 6, background: "#9c6b3f", transform: "rotate(45deg)" }} />
-          <div style={{ width: 52, height: 1, background: "rgba(156,107,63,0.4)" }} />
-        </div>
-      </section>
+      <div style={{ height: "clamp(4.5rem, 12vh, 7rem)" }} />
 
       {/* ════════════════════════════════════════
-          STORY
+          ORNAMENTAL FRAME — wraps title + story + timeline
           ════════════════════════════════════════ */}
-      <article style={{ maxWidth: 660, margin: "0 auto", padding: "clamp(3rem,8vh,5.5rem) 1.5rem 1rem" }}>
-        {paragraphs.map((para, i) => (
-          <p key={i} style={{
-            margin: "0 0 1.65rem",
-            fontSize: i === 0 ? "1.22rem" : "1.02rem",
-            lineHeight: i === 0 ? 1.7 : 1.9,
-            color: i === 0 ? "#1c1810" : "#4a4438",
-            fontFamily: i === 0 ? 'Georgia, "Times New Roman", serif' : "system-ui, sans-serif",
+      <OrnamentalFrame>
+
+        {/* ── Title ── */}
+        <section style={{ textAlign: "center", padding: "0 1rem" }}>
+          <p style={{
+            margin: "0 0 1.2rem",
+            fontSize: "0.7rem", letterSpacing: "0.34em",
+            textTransform: "uppercase", color: "#9c6b3f",
+            fontWeight: 700, fontFamily: "system-ui, sans-serif",
           }}>
-            {para}
+            Lefkoşa · Kuzey Kıbrıs
           </p>
-        ))}
-      </article>
-
-      {/* ════════════════════════════════════════
-          TIMELINE
-          ════════════════════════════════════════ */}
-      {timeline.length > 1 && (
-        <section style={{ maxWidth: 620, margin: "0 auto", padding: "1rem 1.5rem 4rem" }}>
-          <h2 style={{
-            fontSize: "0.72rem", letterSpacing: "0.3em",
-            textTransform: "uppercase",
-            color: "#9c6b3f", fontWeight: 700,
-            fontFamily: "system-ui, sans-serif",
-            marginBottom: "2rem",
+          <h1 style={{
+            fontFamily: 'Georgia, "Times New Roman", serif',
+            fontWeight: 400,
+            fontSize: "clamp(2.1rem, 6vw, 3.8rem)",
+            lineHeight: 1.1, letterSpacing: "-0.01em",
+            color: "#1c1408", margin: 0,
           }}>
-            Kilometre Taşları
-          </h2>
-          <div style={{ position: "relative" }}>
-            <div style={{
-              position: "absolute", left: 7, top: 6, bottom: 6,
-              width: 1,
-              background: "linear-gradient(180deg, #d0be9a, #e4d8c4)",
-            }} />
-            {timeline.map(ev => (
-              <div key={ev.year} style={{ position: "relative", paddingLeft: 36, marginBottom: 28 }}>
-                <div style={{
-                  position: "absolute", left: 0, top: 5,
-                  width: 15, height: 15, borderRadius: "50%",
-                  background: "#faf7f2",
-                  border: "2px solid #9c6b3f",
-                }} />
-                <div style={{
-                  fontFamily: 'Georgia, "Times New Roman", serif',
-                  fontSize: "1.3rem", color: "#9c6b3f", lineHeight: 1, marginBottom: 5,
-                }}>
-                  {ev.year}
-                </div>
-                <p style={{ margin: 0, fontSize: "0.93rem", lineHeight: 1.75, color: "#5a5040" }}>
-                  {ev.text}
-                </p>
-              </div>
-            ))}
+            {translation.title}
+          </h1>
+          <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginTop: "1.4rem" }}>
+            <div style={{ width: 52, height: 1, background: "rgba(156,107,63,0.4)" }} />
+            <div style={{ width: 6, height: 6, background: "#9c6b3f", transform: "rotate(45deg)" }} />
+            <div style={{ width: 52, height: 1, background: "rgba(156,107,63,0.4)" }} />
           </div>
         </section>
-      )}
+
+        {/* ── Story ── */}
+        <article style={{ maxWidth: 600, margin: "0 auto", padding: "clamp(2.2rem,6vh,4rem) 1rem 0.5rem" }}>
+          {paragraphs.map((para, i) => (
+            <p key={i} style={{
+              margin: "0 0 1.65rem",
+              fontSize: i === 0 ? "1.18rem" : "1rem",
+              lineHeight: i === 0 ? 1.75 : 1.9,
+              color: i === 0 ? "#1c1810" : "#4a4438",
+              fontFamily: i === 0 ? 'Georgia, "Times New Roman", serif' : "system-ui, sans-serif",
+            }}>
+              {para}
+            </p>
+          ))}
+        </article>
+
+        {/* ── Timeline ── */}
+        {timeline.length > 1 && (
+          <section style={{ maxWidth: 560, margin: "0 auto", padding: "0.5rem 1rem 0" }}>
+            <h2 style={{
+              fontSize: "0.72rem", letterSpacing: "0.3em",
+              textTransform: "uppercase",
+              color: "#9c6b3f", fontWeight: 700,
+              fontFamily: "system-ui, sans-serif",
+              marginBottom: "2rem",
+            }}>
+              Kilometre Taşları
+            </h2>
+            <div style={{ position: "relative" }}>
+              <div style={{
+                position: "absolute", left: 7, top: 6, bottom: 6,
+                width: 1,
+                background: "linear-gradient(180deg, #d0be9a, #e4d8c4)",
+              }} />
+              {timeline.map(ev => (
+                <div key={ev.year} style={{ position: "relative", paddingLeft: 36, marginBottom: 28 }}>
+                  <div style={{
+                    position: "absolute", left: 0, top: 5,
+                    width: 15, height: 15, borderRadius: "50%",
+                    background: "#faf7f2",
+                    border: "2px solid #9c6b3f",
+                  }} />
+                  <div style={{
+                    fontFamily: 'Georgia, "Times New Roman", serif',
+                    fontSize: "1.3rem", color: "#9c6b3f", lineHeight: 1, marginBottom: 5,
+                  }}>
+                    {ev.year}
+                  </div>
+                  <p style={{ margin: 0, fontSize: "0.93rem", lineHeight: 1.75, color: "#5a5040" }}>
+                    {ev.text}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+      </OrnamentalFrame>
 
       {/* ════════════════════════════════════════
           FOOTER
@@ -589,6 +591,7 @@ export default function LandingPage({ product, translation, allLanguages, slug }
         borderTop: "1px solid #e8dcc8",
         background: "#f2ece0",
         padding: "3.5rem 1.5rem",
+        marginTop: "clamp(4rem,10vh,6rem)",
         textAlign: "center",
       }}>
         <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
@@ -613,7 +616,7 @@ export default function LandingPage({ product, translation, allLanguages, slug }
         </div>
       </footer>
 
-      {/* ── Hatıra biblosu kartı (scroll ile açılır) ── */}
+      {/* ── Hatıra biblosu kartı ── */}
       <BibloCard
         model={fallbackModel}
         title={translation.title}
