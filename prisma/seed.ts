@@ -1,11 +1,7 @@
 import "dotenv/config";
-import path from "path";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { PrismaClient } from "@prisma/client";
 
-const dbUrl = process.env.DATABASE_URL ?? `file:${path.resolve(process.cwd(), "dev.db")}`;
-const adapter = new PrismaBetterSqlite3({ url: dbUrl });
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient();
 
 async function main() {
   const en = await prisma.language.upsert({

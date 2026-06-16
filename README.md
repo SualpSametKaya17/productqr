@@ -16,7 +16,7 @@ A Next.js application to manage multilingual product pages with QR code generati
 ## Tech Stack
 
 - **Next.js 16** (App Router, TypeScript)
-- **Prisma 7** + SQLite (`@prisma/adapter-better-sqlite3`)
+- **Prisma 6** + SQLite
 - **Tailwind CSS v4**
 - **qrcode** for QR PNG generation
 

@@ -1,11 +1,7 @@
 import "dotenv/config";
-import path from "path";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { PrismaClient } from "@prisma/client";
 
-const dbUrl = process.env.DATABASE_URL ?? `file:${path.resolve(process.cwd(), "dev.db")}`;
-const adapter = new PrismaBetterSqlite3({ url: dbUrl });
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient();
 
 const GIRNE_TR = `Lefkoşa'yı çevreleyen ve kökeni Orta Çağ'a uzanan Venedik surlarının üç ana giriş kapısından biri olan Girne Kapısı, adını Girne şehrine açılan yol üzerinde yer almasından alır. Yüzyıllar boyunca farklı medeniyetlere ev sahipliği yapan bu kapı, Lefkoşa'nın en önemli tarihî simgelerinden biridir.
 
