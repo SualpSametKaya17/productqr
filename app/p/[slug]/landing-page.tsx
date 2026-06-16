@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import Viewer3D from "./viewer-3d";
 
 /* ── Types ─────────────────────────────────────────────────────── */
 type Language   = { id: string; code: string; name: string; nativeName: string; isDefault: boolean };
@@ -287,134 +287,166 @@ function Column3D() {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   HERO BACKGROUND — SVG arkaplan siluet
-   ═══════════════════════════════════════════════════════════════ */
-function GateBg() {
-  return (
-    <svg viewBox="0 0 800 500" preserveAspectRatio="xMidYMax slice"
-      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.13 }}
-      aria-hidden>
-      {/* Sky */}
-      <rect width="800" height="500" fill="none" />
-      {/* Venetian wall base */}
-      <rect x="0" y="380" width="800" height="120" fill="#5a3c20" />
-      {/* Battlements */}
-      {Array.from({ length: 20 }, (_, i) => (
-        <rect key={i} x={i * 42} y="356" width="26" height="28" fill="#5a3c20" />
-      ))}
-      {/* Gate body */}
-      <rect x="280" y="160" width="240" height="220" fill="#7a5832" />
-      {/* Arch opening */}
-      <ellipse cx="400" cy="380" rx="88" ry="120" fill="#0e0a04" />
-      <rect x="312" y="260" width="176" height="130" fill="#0e0a04" />
-      {/* Arch outline */}
-      <path d="M312 270 Q400 150 488 270" fill="none" stroke="#9a7848" strokeWidth="8" />
-      {/* Keystone */}
-      <polygon points="400,148 416,178 384,178" fill="#a88c60" />
-      {/* Watchtower */}
-      <rect x="360" y="60" width="80" height="105" fill="#6a4c2c" />
-      <rect x="350" y="44" width="100" height="20" fill="#5a3c1c" />
-      {[354, 378, 402, 426].map(x => <rect key={x} x={x} y="24" width="22" height="22" fill="#5a3c1c" />)}
-      <rect x="390" y="78" width="20" height="30" rx="10" fill="#0e0a04" />
-      {/* Flanking towers */}
-      <rect x="180" y="220" width="80" height="160" fill="#6a4c2c" />
-      <rect x="540" y="220" width="80" height="160" fill="#6a4c2c" />
-      {[184, 208, 232].map(x => <rect key={x} x={x} y="204" width="22" height="18" fill="#5a3c1c" />)}
-      {[544, 568, 592].map(x => <rect key={x} x={x} y="204" width="22" height="18" fill="#5a3c1c" />)}
-      {/* Stone texture lines */}
-      {[200, 240, 280, 320, 360].map(y =>
-        <line key={y} x1="180" y1={y} x2="280" y2={y} stroke="#4a3018" strokeWidth="1.5" />
-      )}
-      {[200, 240, 280, 320, 360].map(y =>
-        <line key={y} x1="540" y1={y} x2="620" y2={y} stroke="#4a3018" strokeWidth="1.5" />
-      )}
-    </svg>
-  );
-}
-
-function ColumnBg() {
-  return (
-    <svg viewBox="0 0 800 500" preserveAspectRatio="xMidYMax slice"
-      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", opacity: 0.13 }}
-      aria-hidden>
-      {/* Ground / square */}
-      <ellipse cx="400" cy="460" rx="300" ry="30" fill="#5a5040" />
-      {/* Stairway base */}
-      <rect x="280" y="430" width="240" height="30" fill="#7a6a50" />
-      <rect x="300" y="406" width="200" height="26" fill="#8a7a60" />
-      <rect x="320" y="386" width="160" height="22" fill="#9a8a70" />
-      {/* Plinth */}
-      <rect x="348" y="360" width="104" height="28" fill="#a89878" />
-      <rect x="358" y="340" width="84" height="22" fill="#b4a484" />
-      {/* Shaft */}
-      <rect x="378" y="96" width="44" height="246" fill="#c0aa88" />
-      {/* Fluting */}
-      {[382, 390, 398, 406, 414].map(x =>
-        <line key={x} x1={x} y1="100" x2={x} y2="340" stroke="#9a8868" strokeWidth="1.5" />
-      )}
-      {/* Capital */}
-      <rect x="362" y="76" width="76" height="22" fill="#b0a080" rx="2" />
-      <rect x="352" y="60" width="96" height="18" fill="#a09070" rx="2" />
-      {/* Sphere */}
-      <circle cx="400" cy="42" r="22" fill="#c8962a" />
-      <circle cx="392" cy="34" r="7" fill="#f0d060" opacity="0.6" />
-      {/* Decorative rings on shaft */}
-      {[140, 200, 270].map(y =>
-        <rect key={y} x="374" y={y} width="52" height="6" fill="#a89060" />
-      )}
-      {/* Background buildings */}
-      <rect x="50" y="340" width="120" height="90" fill="#6a5840" opacity="0.4" />
-      <rect x="630" y="320" width="100" height="110" fill="#6a5840" opacity="0.4" />
-    </svg>
-  );
-}
-
-/* ═══════════════════════════════════════════════════════════════
    MAIN COMPONENT
    ═══════════════════════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════════
+   BIBLO CARD — scroll ile açılan, kaldırılabilen hatıra biblosu kartı
+   ═══════════════════════════════════════════════════════════════ */
+function BibloCard({
+  model, title, bibloImg, visible, onClose,
+}: {
+  model: React.ReactNode;
+  title: string;
+  bibloImg?: string;
+  visible: boolean;
+  onClose: () => void;
+}) {
+  return (
+    <div
+      style={{
+        position: "fixed",
+        left: "50%",
+        bottom: 20,
+        zIndex: 55,
+        width: "min(92vw, 380px)",
+        transform: visible
+          ? "translateX(-50%) translateY(0) scale(1)"
+          : "translateX(-50%) translateY(140%) scale(0.96)",
+        opacity: visible ? 1 : 0,
+        transition: "transform 0.5s cubic-bezier(0.22,1,0.36,1), opacity 0.4s ease",
+        pointerEvents: visible ? "auto" : "none",
+      }}
+    >
+      <div style={{
+        position: "relative",
+        display: "flex",
+        alignItems: "center",
+        gap: 14,
+        padding: 14,
+        background: "rgba(255,255,255,0.94)",
+        backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)",
+        border: "1px solid rgba(156,107,63,0.18)",
+        borderRadius: 18,
+        boxShadow: "0 24px 60px -18px rgba(60,40,15,0.45)",
+      }}>
+        {/* Mini 3D figurine / biblo */}
+        <div style={{
+          flexShrink: 0,
+          width: 96, height: 110,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          background: "linear-gradient(160deg, #f4ede0, #e6d9c2)",
+          borderRadius: 12,
+          overflow: "hidden",
+          boxShadow: "inset 0 2px 8px rgba(120,90,50,0.18)",
+        }}>
+          {bibloImg ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={bibloImg} alt={`${title} biblosu`}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          ) : (
+            <div style={{ transform: "scale(0.34)", transformOrigin: "center" }}>{model}</div>
+          )}
+        </div>
+
+        {/* Text */}
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <span style={{
+            fontSize: "0.62rem", letterSpacing: "0.2em", textTransform: "uppercase",
+            color: "#9c6b3f", fontWeight: 700, fontFamily: "system-ui, sans-serif",
+          }}>
+            Hatıra Biblosu
+          </span>
+          <p style={{
+            margin: "4px 0 0",
+            fontFamily: 'Georgia, "Times New Roman", serif',
+            fontSize: "1.02rem", color: "#1c1408", lineHeight: 1.25,
+          }}>
+            {title}
+          </p>
+          <p style={{ margin: "5px 0 0", fontSize: "0.74rem", color: "#8a7a60" }}>
+            El yapımı koleksiyon biblosu
+          </p>
+        </div>
+
+        {/* Dismiss button */}
+        <button
+          onClick={onClose}
+          title="Kartı kaldır"
+          style={{
+            position: "absolute", top: -12, right: -12,
+            width: 30, height: 30, borderRadius: "50%",
+            background: "#1c1810", color: "#fff",
+            border: "2px solid #faf7f2", cursor: "pointer",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+          }}
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+            <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function LandingPage({ product, translation, allLanguages, slug }: Props) {
   const router    = useRouter();
   const langCode  = translation.language.code;
   const paragraphs = getParagraphs(translation.description);
   const timeline  = extractTimeline(translation.description);
   const images    = product.images;
-  const [activeIdx, setActiveIdx] = useState(0);
-  const activeImg = images[activeIdx];
 
   const isGate   = slug === "girne-kapisi";
   const isColumn = slug === "lefkosa-dikilitas";
 
-  // Sky gradient: deep blue-grey at top → warm sandy stone at bottom
-  const heroBg = isGate
-    ? "linear-gradient(175deg, #4a6a88 0%, #7a9ab8 18%, #b0c4d0 35%, #cbb890 58%, #c4a87a 78%, #b89860 100%)"
-    : "linear-gradient(175deg, #384858 0%, #607888 18%, #90a8bc 35%, #c8bca0 55%, #d0c090 72%, #c0aa78 100%)";
+  // CSS-3D fallback model shown inside the viewer when no photo is uploaded
+  const fallbackModel = isGate ? <Gate3D /> : isColumn ? <Column3D /> : null;
+
+  const switchLang = (code: string) =>
+    router.push(`/p/${slug}?lang=${code}`, { scroll: false });
+
+  /* ── Biblo card: aşağı kaydırınca aç, kullanıcı kaldırınca gizle ── */
+  const [bibloVisible, setBibloVisible] = useState(false);
+  const [bibloDismissed, setBibloDismissed] = useState(false);
+
+  useEffect(() => {
+    if (bibloDismissed) return;
+    const onScroll = () => {
+      const past = window.scrollY > window.innerHeight * 0.55;
+      setBibloVisible(past && !bibloDismissed);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [bibloDismissed]);
 
   return (
     <main style={{ background: "#faf7f2", minHeight: "100vh", WebkitFontSmoothing: "antialiased" }}>
       <style>{STYLES}</style>
 
-      {/* ── Language switcher ── */}
+      {/* ── Language switcher (scroll preserved) ── */}
       {allLanguages.length > 1 && (
         <div style={{
-          position: "fixed", top: 16, right: 16, zIndex: 50,
+          position: "fixed", top: 16, right: 16, zIndex: 60,
           display: "flex", gap: 4, padding: 4,
           borderRadius: 9999,
-          background: "rgba(255,255,255,0.88)",
+          background: "rgba(28,28,32,0.82)",
           backdropFilter: "blur(14px)",
           WebkitBackdropFilter: "blur(14px)",
-          border: "1px solid rgba(190,170,130,0.3)",
-          boxShadow: "0 4px 20px rgba(0,0,0,0.10)",
+          border: "1px solid rgba(255,255,255,0.1)",
+          boxShadow: "0 6px 24px rgba(0,0,0,0.3)",
         }}>
           {allLanguages.map(lang => {
             const active = lang.code === langCode;
             return (
               <button key={lang.code}
-                onClick={() => router.push(`/p/${slug}?lang=${lang.code}`)}
+                onClick={() => switchLang(lang.code)}
                 style={{
-                  padding: "0.35rem 0.95rem",
+                  padding: "0.4rem 1rem",
                   borderRadius: 9999, border: "none",
-                  background: active ? "#1c1810" : "transparent",
-                  color: active ? "#faf7f2" : "#6a5e4a",
+                  background: active ? "#fff" : "transparent",
+                  color: active ? "#1c1810" : "#cfcabf",
                   fontWeight: active ? 700 : 500,
                   fontSize: "0.78rem", letterSpacing: "0.07em",
                   cursor: "pointer",
@@ -429,133 +461,40 @@ export default function LandingPage({ product, translation, allLanguages, slug }
       )}
 
       {/* ════════════════════════════════════════
-          HERO — gradient sky + monument silhouette + 3D model
+          HERO — interactive 3D viewer (dark)
           ════════════════════════════════════════ */}
-      <section style={{
-        position: "relative",
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
-        textAlign: "center",
-        overflow: "hidden",
-        background: heroBg,
-      }}>
-        {/* Background SVG silhouette */}
-        {isGate   && <GateBg />}
-        {isColumn && <ColumnBg />}
+      <Viewer3D
+        title={translation.title}
+        location="Lefkoşa · Kıbrıs"
+        images={images.map(i => ({ id: i.id, url: i.url, alt: i.alt }))}
+        fallback={fallbackModel}
+      />
 
-        {/* Bottom fade to content */}
-        <div style={{
-          position: "absolute", bottom: 0, left: 0, right: 0, height: "35%",
-          background: "linear-gradient(to bottom, transparent, rgba(200,185,150,0.5))",
-          pointerEvents: "none",
-        }} />
-
-        {/* Content */}
-        <div style={{ position: "relative", zIndex: 1, padding: "5rem 1.5rem 3rem" }}>
-
-          {/* Location tag */}
-          <p style={{
-            margin: "0 0 2rem",
-            fontSize: "0.7rem", letterSpacing: "0.36em",
-            textTransform: "uppercase",
-            color: "rgba(255,245,220,0.75)",
-            fontWeight: 600,
-            fontFamily: "system-ui, sans-serif",
-            animation: "fadeUp 0.9s ease both",
-            textShadow: "0 1px 4px rgba(0,0,0,0.3)",
-          }}>
-            Lefkoşa · Kuzey Kıbrıs
-          </p>
-
-          {/* 3D Monument */}
-          <div style={{ animation: "fadeUp 1s ease 0.2s both" }}>
-            {isGate   && <Gate3D />}
-            {isColumn && <Column3D />}
-            {!isGate && !isColumn && <div style={{ height: 60 }} />}
-          </div>
-
-          {/* Title */}
-          <h1 style={{
-            fontFamily: 'Georgia, "Times New Roman", serif',
-            fontWeight: 400,
-            fontSize: "clamp(2.2rem, 7vw, 4.2rem)",
-            lineHeight: 1.08,
-            letterSpacing: "-0.01em",
-            color: "#1c1408",
-            textShadow: "0 2px 16px rgba(255,240,190,0.55), 0 1px 3px rgba(0,0,0,0.2)",
-            margin: "1.6rem 0 0.5rem",
-            animation: "fadeUp 1s ease 0.4s both",
-          }}>
-            {translation.title}
-          </h1>
-
-          {/* Divider */}
-          <div style={{
-            display: "flex", alignItems: "center", gap: 12,
-            justifyContent: "center", marginTop: "1.2rem",
-            animation: "fadeUp 1s ease 0.6s both",
-          }}>
-            <div style={{ width: 52, height: 1, background: "rgba(80,55,25,0.45)" }} />
-            <div style={{ width: 6, height: 6, background: "rgba(80,55,25,0.55)", transform: "rotate(45deg)" }} />
-            <div style={{ width: 52, height: 1, background: "rgba(80,55,25,0.45)" }} />
-          </div>
-        </div>
-
-        {/* Scroll arrow */}
-        <div style={{
-          position: "absolute", bottom: "2rem", left: "50%",
-          animation: "bounce 2s ease-in-out infinite", opacity: 0.5,
+      {/* ── Light title bar ── */}
+      <section style={{ textAlign: "center", padding: "clamp(2.5rem,7vh,4.5rem) 1.5rem 0" }}>
+        <p style={{
+          margin: "0 0 1.2rem",
+          fontSize: "0.7rem", letterSpacing: "0.34em",
+          textTransform: "uppercase", color: "#9c6b3f",
+          fontWeight: 700, fontFamily: "system-ui, sans-serif",
         }}>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3c2c10" strokeWidth="2">
-            <path d="M12 5v14M5 12l7 7 7-7" />
-          </svg>
+          Lefkoşa · Kuzey Kıbrıs
+        </p>
+        <h1 style={{
+          fontFamily: 'Georgia, "Times New Roman", serif',
+          fontWeight: 400,
+          fontSize: "clamp(2.1rem, 6vw, 3.8rem)",
+          lineHeight: 1.1, letterSpacing: "-0.01em",
+          color: "#1c1408", margin: 0,
+        }}>
+          {translation.title}
+        </h1>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginTop: "1.4rem" }}>
+          <div style={{ width: 52, height: 1, background: "rgba(156,107,63,0.4)" }} />
+          <div style={{ width: 6, height: 6, background: "#9c6b3f", transform: "rotate(45deg)" }} />
+          <div style={{ width: 52, height: 1, background: "rgba(156,107,63,0.4)" }} />
         </div>
       </section>
-
-      {/* ════════════════════════════════════════
-          PHOTO GALLERY
-          ════════════════════════════════════════ */}
-      {images.length > 0 && activeImg && (
-        <section style={{ maxWidth: 960, margin: "0 auto", padding: "4rem 1.5rem 0" }}>
-          <div style={{
-            position: "relative", width: "100%", aspectRatio: "16 / 9",
-            borderRadius: 14, overflow: "hidden",
-            background: "#e8d8bc",
-            boxShadow: "0 32px 72px -30px rgba(80,55,20,0.45)",
-          }}>
-            <Image
-              src={activeImg.url}
-              alt={activeImg.alt ?? translation.title}
-              fill
-              sizes="(max-width: 960px) 100vw, 960px"
-              style={{ objectFit: "cover" }}
-              priority
-            />
-          </div>
-          {images.length > 1 && (
-            <div style={{ display: "flex", gap: 10, marginTop: 14, justifyContent: "center", flexWrap: "wrap" }}>
-              {images.map((img, i) => (
-                <button key={img.id} onClick={() => setActiveIdx(i)}
-                  aria-label={`Görsel ${i + 1}`}
-                  style={{
-                    position: "relative", width: 84, height: 60,
-                    borderRadius: 8, overflow: "hidden",
-                    cursor: "pointer", padding: 0,
-                    border: `2px solid ${i === activeIdx ? "#9c6b3f" : "transparent"}`,
-                    opacity: i === activeIdx ? 1 : 0.55,
-                    transition: "all 0.2s",
-                    background: "#e8d8bc",
-                  }}>
-                  <Image src={img.url} alt={img.alt ?? ""} fill sizes="84px" style={{ objectFit: "cover" }} />
-                </button>
-              ))}
-            </div>
-          )}
-        </section>
-      )}
 
       {/* ════════════════════════════════════════
           STORY
@@ -647,6 +586,14 @@ export default function LandingPage({ product, translation, allLanguages, slug }
           </p>
         </div>
       </footer>
+
+      {/* ── Hatıra biblosu kartı (scroll ile açılır) ── */}
+      <BibloCard
+        model={fallbackModel}
+        title={translation.title}
+        visible={bibloVisible}
+        onClose={() => { setBibloDismissed(true); setBibloVisible(false); }}
+      />
     </main>
   );
 }
