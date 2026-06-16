@@ -11,6 +11,8 @@ import type { ExperienceAPI, Hotspot } from "../lib/types";
 
 type Props = {
   imageUrl: string;
+  depthUrl?: string;
+  normalUrl?: string;
   hotspots: Hotspot[];
   activeHotspot: string | null;
   autoRotate: boolean;
@@ -27,6 +29,8 @@ type Props = {
  */
 export default function HeritageScene({
   imageUrl,
+  depthUrl,
+  normalUrl,
   hotspots,
   activeHotspot,
   autoRotate,
@@ -53,6 +57,8 @@ export default function HeritageScene({
       <Suspense fallback={null}>
         <Diorama
           imageUrl={imageUrl}
+          depthUrl={depthUrl}
+          normalUrl={normalUrl}
           hotspots={hotspots}
           activeHotspot={activeHotspot}
           onHotspotClick={onHotspotClick}

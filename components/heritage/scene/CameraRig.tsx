@@ -96,10 +96,10 @@ export function CameraRig({ autoRotate, onReady, onFocusChange }: Props) {
       zoomSpeed={0.7}
       minDistance={4}
       maxDistance={12}
-      minPolarAngle={Math.PI * 0.28}
-      maxPolarAngle={Math.PI * 0.6}
-      minAzimuthAngle={-Math.PI * 0.32}
-      maxAzimuthAngle={Math.PI * 0.32}
+      minPolarAngle={Math.PI * 0.26}
+      maxPolarAngle={Math.PI * 0.62}
+      minAzimuthAngle={-Math.PI * 0.42}
+      maxAzimuthAngle={Math.PI * 0.42}
       autoRotate={autoRotate}
       autoRotateSpeed={0.45}
       onStart={handleStart}

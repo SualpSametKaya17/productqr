@@ -38,6 +38,9 @@ export type ExperienceAPI = {
 
 export type HeritageData = {
   imageUrl: string;
+  /** Optional depth + normal maps that turn the photo into a 3D relief. */
+  depthUrl?: string;
+  normalUrl?: string;
   title: string;
   location: string;
   languages: LanguageOption[];

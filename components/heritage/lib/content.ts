@@ -107,6 +107,22 @@ const CONTENT: SlugMap = {
   },
 };
 
+/**
+ * Pre-generated depth + normal maps (see scripts/generate-depth.mjs) that
+ * turn a flat photo into a real displaced 3D relief. Slugs without an entry
+ * gracefully fall back to the concave photo slab.
+ */
+export const RELIEF_MAPS: Record<string, { depth: string; normal: string }> = {
+  "lefkosa-dikilitas": {
+    depth: "/images/dikilitas-depth.png",
+    normal: "/images/dikilitas-normal.png",
+  },
+};
+
+export function getReliefMaps(slug: string) {
+  return RELIEF_MAPS[slug] ?? null;
+}
+
 export function buildHotspots(slug: string, lang: string): Hotspot[] {
   const forSlug = CONTENT[slug];
   if (!forSlug) return [];
