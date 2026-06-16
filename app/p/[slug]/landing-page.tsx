@@ -621,30 +621,38 @@ export default function LandingPage({ translation, allLanguages, slug }: Props) 
       <footer style={{
         borderTop: "1px solid #e8dcc8",
         background: "#f2ece0",
-        padding: "3.5rem 1.5rem",
+        padding: "2.5rem 1.5rem",
         marginTop: "clamp(4rem,10vh,6rem)",
         textAlign: "center",
       }}>
-        <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 16 }}>
-          <div style={{
-            padding: 14, background: "#fff",
-            borderRadius: 16,
-            border: "1px solid #e0d4bc",
-            boxShadow: "0 12px 36px -16px rgba(80,55,20,0.32)",
-          }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={`/api/qr/${slug}`} alt="QR Kod" width={112} height={112}
-              style={{ display: "block", borderRadius: 8 }} />
-          </div>
-          <p style={{
-            margin: 0, fontSize: "0.68rem",
-            letterSpacing: "0.28em", textTransform: "uppercase",
-            color: "#9c8870", fontWeight: 600,
-            fontFamily: "system-ui, sans-serif",
-          }}>
-            Lefkoşa Turizm
-          </p>
+        {/* Thin ornamental divider */}
+        <div style={{
+          display: "flex", alignItems: "center", justifyContent: "center",
+          gap: 10, marginBottom: "1.6rem",
+        }}>
+          <div style={{ width: 48, height: 1, background: "rgba(156,107,63,0.3)" }}/>
+          <div style={{ width: 5, height: 5, background: "#9c6b3f", transform: "rotate(45deg)" }}/>
+          <div style={{ width: 48, height: 1, background: "rgba(156,107,63,0.3)" }}/>
         </div>
+
+        <p style={{
+          margin: "0 0 6px",
+          fontSize: "0.72rem",
+          letterSpacing: "0.16em",
+          color: "#9c8870",
+          fontFamily: "system-ui, sans-serif",
+        }}>
+          © {new Date().getFullYear()} Tüm Hakları Saklıdır.
+        </p>
+        <p style={{
+          margin: 0,
+          fontSize: "0.68rem",
+          letterSpacing: "0.12em",
+          color: "#b8a888",
+          fontFamily: "system-ui, sans-serif",
+        }}>
+          Hosted by <span style={{ color: "#9c6b3f", fontWeight: 600 }}>DatumSpace</span>
+        </p>
       </footer>
 
       {/* ── Hatıra biblosu kartı ── */}
