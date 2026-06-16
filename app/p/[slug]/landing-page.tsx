@@ -344,9 +344,9 @@ function BibloCard({
           {bibloImg ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={bibloImg} alt={`${title} biblosu`}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+              style={{ width: "84%", height: "84%", objectFit: "contain" }} />
           ) : (
-            <div style={{ transform: "scale(0.34)", transformOrigin: "center" }}>{model}</div>
+            <div style={{ transform: "scale(0.24)", transformOrigin: "center" }}>{model}</div>
           )}
         </div>
 

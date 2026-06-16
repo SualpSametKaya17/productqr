@@ -89,20 +89,15 @@ export function Model3D({
     floatRef.current.position.y = Math.sin(state.clock.elapsedTime * 0.55) * 0.07;
   });
 
-  /* Arrange hotspots in a frontal arc around the monument. */
+  /* Place hotspots along the left/right edges of the monument so they
+     never overlap the model. Alternate sides, descending top -> bottom. */
   const placed = hotspots.map((h, i) => {
     const n = Math.max(hotspots.length - 1, 1);
-    const angle = -0.9 + (i / n) * 1.8; // front ~±100°
-    const radius = TARGET_HEIGHT * 0.34;
-    const y = TARGET_HEIGHT * (0.42 - (i / n) * 0.78);
-    return {
-      ...h,
-      pos: [Math.sin(angle) * radius, y, Math.cos(angle) * radius] as [
-        number,
-        number,
-        number,
-      ],
-    };
+    const side = i % 2 === 0 ? -1 : 1;
+    const x = side * TARGET_HEIGHT * 0.42;
+    const y = TARGET_HEIGHT * (0.4 - (i / n) * 0.78);
+    const z = TARGET_HEIGHT * 0.16; // sit slightly toward the viewer
+    return { ...h, pos: [x, y, z] as [number, number, number] };
   });
 
   return (

@@ -20,30 +20,10 @@ export function TitleBadge({ title, location }: Props) {
         display: "flex",
         alignItems: "center",
         gap: 12,
-        padding: "10px 16px 10px 12px",
+        padding: "10px 18px",
         maxWidth: "min(72vw, 380px)",
       }}
     >
-      <div
-        style={{
-          width: 42,
-          height: 42,
-          flexShrink: 0,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          border: "1px solid rgba(213,176,94,0.45)",
-          borderRadius: 10,
-          fontSize: "0.78rem",
-          fontWeight: 800,
-          color: "#e7c878",
-          letterSpacing: "-0.02em",
-          background:
-            "linear-gradient(150deg, rgba(213,176,94,0.18), rgba(213,176,94,0.04))",
-        }}
-      >
-        3D
-      </div>
       <div style={{ minWidth: 0 }}>
         <div
           style={{
