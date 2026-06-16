@@ -118,7 +118,7 @@ const CONTENT: SlugMap = {
  * entry here. The model takes priority over depth-map relief.
  */
 export const MODELS: Record<string, string> = {
-  // "lefkosa-dikilitas": "/models/lefkosa-dikilitas.glb",
+  "lefkosa-dikilitas": "/models/lefkosa-dikilitas.glb",
 };
 
 export function getModelUrl(slug: string): string | undefined {
