@@ -2,6 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
+import { getModelUrl } from "@/components/heritage/lib/content";
+
+/* Mini WebGL figurine for the biblo card — client-only (no SSR). */
+const BibloModel = dynamic(() => import("@/components/heritage/BibloModel"), {
+  ssr: false,
+});
 
 /* ── Types ─────────────────────────────────────────────────────── */
 type Language    = { id: string; code: string; name: string; nativeName: string; isDefault: boolean };
@@ -227,37 +234,44 @@ function Column3D() {
 /* ═══════════════════════════════════════════════════════════════
    ORNAMENTAL FRAME — museum-quality heritage border
    ═══════════════════════════════════════════════════════════════ */
-function OrnamentalFrame({ children }: { children: React.ReactNode }) {
-  const G  = "#9c6b3f";
-  const GL = "rgba(156,107,63,0.45)";
-  const GB = "rgba(156,107,63,0.22)";
+const FRAME_G  = "#9c6b3f";
+const FRAME_GL = "rgba(156,107,63,0.45)";
+const FRAME_GB = "rgba(156,107,63,0.22)";
 
-  /* Corner SVG — top-left orientation; mirrors handle other corners */
-  const Corner = () => (
+/* Corner SVG — top-left orientation; CSS mirrors handle other corners */
+function FrameCorner() {
+  return (
     <svg width="66" height="66" viewBox="0 0 66 66" fill="none" xmlns="http://www.w3.org/2000/svg">
       {/* L-shaped bracket lines */}
-      <line x1="9" y1="9" x2="9" y2="58" stroke={G} strokeWidth="1.5" strokeLinecap="round"/>
-      <line x1="9" y1="9" x2="58" y2="9" stroke={G} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="9" y1="9" x2="9" y2="58" stroke={FRAME_G} strokeWidth="1.5" strokeLinecap="round"/>
+      <line x1="9" y1="9" x2="58" y2="9" stroke={FRAME_G} strokeWidth="1.5" strokeLinecap="round"/>
       {/* Diamond at the corner apex */}
-      <rect x="4.5" y="4.5" width="9" height="9" transform="rotate(45 9 9)" fill={G}/>
+      <rect x="4.5" y="4.5" width="9" height="9" transform="rotate(45 9 9)" fill={FRAME_G}/>
       {/* End circles */}
-      <circle cx="9"  cy="58" r="2.5" fill={G} opacity="0.65"/>
-      <circle cx="58" cy="9"  r="2.5" fill={G} opacity="0.65"/>
+      <circle cx="9"  cy="58" r="2.5" fill={FRAME_G} opacity="0.65"/>
+      <circle cx="58" cy="9"  r="2.5" fill={FRAME_G} opacity="0.65"/>
       {/* Short accent ticks */}
-      <line x1="9"  y1="25" x2="18" y2="25" stroke={GL} strokeWidth="1.1"/>
-      <line x1="25" y1="9"  x2="25" y2="18" stroke={GL} strokeWidth="1.1"/>
-      <line x1="9"  y1="40" x2="15" y2="40" stroke={GL} strokeWidth="0.8"/>
-      <line x1="40" y1="9"  x2="40" y2="15" stroke={GL} strokeWidth="0.8"/>
+      <line x1="9"  y1="25" x2="18" y2="25" stroke={FRAME_GL} strokeWidth="1.1"/>
+      <line x1="25" y1="9"  x2="25" y2="18" stroke={FRAME_GL} strokeWidth="1.1"/>
+      <line x1="9"  y1="40" x2="15" y2="40" stroke={FRAME_GL} strokeWidth="0.8"/>
+      <line x1="40" y1="9"  x2="40" y2="15" stroke={FRAME_GL} strokeWidth="0.8"/>
     </svg>
   );
+}
 
-  /* Small diamond used in centre-edge ornaments */
-  const CentreDiamond = () => (
+/* Small diamond used in the centre-top ornament */
+function FrameCentreDiamond() {
+  return (
     <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
-      <rect x="3.8" y="3.8" width="10.4" height="10.4" transform="rotate(45 9 9)" fill={G}/>
+      <rect x="3.8" y="3.8" width="10.4" height="10.4" transform="rotate(45 9 9)" fill={FRAME_G}/>
       <rect x="5.8" y="5.8" width="6.4"  height="6.4"  transform="rotate(45 9 9)" fill="#faf7f2"/>
     </svg>
   );
+}
+
+function OrnamentalFrame({ children }: { children: React.ReactNode }) {
+  const GB = FRAME_GB;
+  const G  = FRAME_G;
 
   return (
     <div style={{
@@ -277,16 +291,16 @@ function OrnamentalFrame({ children }: { children: React.ReactNode }) {
 
       {/* ── Corner ornaments ── */}
       <div style={{ position: "absolute", top: -4, left: -4 }}>
-        <Corner />
+        <FrameCorner />
       </div>
       <div style={{ position: "absolute", top: -4, right: -4, transform: "scaleX(-1)" }}>
-        <Corner />
+        <FrameCorner />
       </div>
       <div style={{ position: "absolute", bottom: -4, left: -4, transform: "scaleY(-1)" }}>
-        <Corner />
+        <FrameCorner />
       </div>
       <div style={{ position: "absolute", bottom: -4, right: -4, transform: "scale(-1,-1)" }}>
-        <Corner />
+        <FrameCorner />
       </div>
 
       {/* ── Centre-top ornament (sits on the top border line) ── */}
@@ -298,7 +312,7 @@ function OrnamentalFrame({ children }: { children: React.ReactNode }) {
         marginTop: 9,
       }}>
         <div style={{ width: 34, height: 1, background: GB }}/>
-        <CentreDiamond />
+        <FrameCentreDiamond />
         <div style={{ width: 34, height: 1, background: GB }}/>
       </div>
 
@@ -327,11 +341,12 @@ function OrnamentalFrame({ children }: { children: React.ReactNode }) {
    BIBLO CARD
    ═══════════════════════════════════════════════════════════════ */
 function BibloCard({
-  model, title, bibloImg, visible, onClose,
+  model, title, bibloImg, modelUrl, visible, onClose,
 }: {
   model: React.ReactNode;
   title: string;
   bibloImg?: string;
+  modelUrl?: string;
   visible: boolean;
   onClose: () => void;
 }) {
@@ -364,6 +379,7 @@ function BibloCard({
         boxShadow: "0 24px 60px -18px rgba(60,40,15,0.45)",
       }}>
         <div style={{
+          position: "relative",
           flexShrink: 0,
           width: 96, height: 110,
           display: "flex", alignItems: "center", justifyContent: "center",
@@ -371,8 +387,21 @@ function BibloCard({
           borderRadius: 12,
           overflow: "hidden",
           boxShadow: "inset 0 2px 8px rgba(120,90,50,0.18)",
+          cursor: modelUrl ? "grab" : "default",
         }}>
-          {bibloImg ? (
+          {modelUrl ? (
+            <>
+              {visible && <BibloModel modelUrl={modelUrl} />}
+              {/* "3D" hint chip */}
+              <span style={{
+                position: "absolute", bottom: 5, right: 6,
+                fontSize: "0.5rem", fontWeight: 800, letterSpacing: "0.08em",
+                color: "#fff", background: "rgba(28,24,16,0.66)",
+                padding: "2px 5px", borderRadius: 6,
+                fontFamily: "system-ui, sans-serif", pointerEvents: "none",
+              }}>3D</span>
+            </>
+          ) : bibloImg ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={bibloImg} alt={`${title} biblosu`}
               style={{ width: "84%", height: "84%", objectFit: "contain" }} />
@@ -422,17 +451,19 @@ function BibloCard({
 /* ═══════════════════════════════════════════════════════════════
    MAIN COMPONENT
    ═══════════════════════════════════════════════════════════════ */
-export default function LandingPage({ product, translation, allLanguages, slug }: Props) {
+export default function LandingPage({ translation, allLanguages, slug }: Props) {
   const router     = useRouter();
   const langCode   = translation.language.code;
   const paragraphs = getParagraphs(translation.description);
   const timeline   = extractTimeline(translation.description);
-  const images     = product.images;
 
   const isGate   = slug === "girne-kapisi";
   const isColumn = slug === "lefkosa-dikilitas";
 
   const fallbackModel = isGate ? <Gate3D /> : isColumn ? <Column3D /> : null;
+
+  // Real GLB figurine shown inside the biblo card, when one exists.
+  const modelUrl = getModelUrl(slug);
 
   const switchLang = (code: string) =>
     router.push(`/p/${slug}?lang=${code}`, { scroll: false });
@@ -619,6 +650,7 @@ export default function LandingPage({ product, translation, allLanguages, slug }
       {/* ── Hatıra biblosu kartı ── */}
       <BibloCard
         model={fallbackModel}
+        modelUrl={modelUrl}
         title={translation.title}
         visible={bibloVisible}
         onClose={() => { setBibloDismissed(true); setBibloVisible(false); }}
