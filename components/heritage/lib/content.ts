@@ -112,6 +112,19 @@ const CONTENT: SlugMap = {
  * turn a flat photo into a real displaced 3D relief. Slugs without an entry
  * gracefully fall back to the concave photo slab.
  */
+/**
+ * Pre-built 3D model files in public/models/.
+ * Convention: drop your .glb at public/models/{slug}.glb, then add an
+ * entry here. The model takes priority over depth-map relief.
+ */
+export const MODELS: Record<string, string> = {
+  // "lefkosa-dikilitas": "/models/lefkosa-dikilitas.glb",
+};
+
+export function getModelUrl(slug: string): string | undefined {
+  return MODELS[slug];
+}
+
 export const RELIEF_MAPS: Record<string, { depth: string; normal: string }> = {
   "lefkosa-dikilitas": {
     depth: "/images/dikilitas-depth.png",

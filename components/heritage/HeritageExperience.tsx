@@ -23,6 +23,7 @@ type Props = HeritageData & {
 
 export default function HeritageExperience({
   imageUrl,
+  modelUrl,
   depthUrl,
   normalUrl,
   title,
@@ -96,6 +97,7 @@ export default function HeritageExperience({
 
       <HeritageScene
         imageUrl={imageUrl}
+        modelUrl={modelUrl}
         depthUrl={depthUrl}
         normalUrl={normalUrl}
         hotspots={hotspots}

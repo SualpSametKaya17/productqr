@@ -38,6 +38,8 @@ export type ExperienceAPI = {
 
 export type HeritageData = {
   imageUrl: string;
+  /** Optional pre-built 3D model (GLB/GLTF). When set, replaces the photo. */
+  modelUrl?: string;
   /** Optional depth + normal maps that turn the photo into a 3D relief. */
   depthUrl?: string;
   normalUrl?: string;

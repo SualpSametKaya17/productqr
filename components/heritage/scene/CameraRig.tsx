@@ -15,16 +15,13 @@ const IDLE_DELAY = 3200;
 
 type Props = {
   autoRotate: boolean;
+  /** Remove azimuth limits so the model can be orbited 360°. */
+  fullOrbit?: boolean;
   onReady: (api: ExperienceAPI) => void;
   onFocusChange: (focused: boolean) => void;
 };
 
-/**
- * Wraps OrbitControls with damping, zoom limits and an idle auto-rotate
- * that pauses while the user interacts. Exposes GSAP-driven reset and
- * focus moves to the surrounding UI through the ExperienceAPI handle.
- */
-export function CameraRig({ autoRotate, onReady, onFocusChange }: Props) {
+export function CameraRig({ autoRotate, fullOrbit = false, onReady, onFocusChange }: Props) {
   const controls = useRef<ComponentRef<typeof OrbitControls>>(null);
   const camera = useThree((s) => s.camera);
   const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -96,10 +93,10 @@ export function CameraRig({ autoRotate, onReady, onFocusChange }: Props) {
       zoomSpeed={0.7}
       minDistance={4}
       maxDistance={12}
-      minPolarAngle={Math.PI * 0.26}
-      maxPolarAngle={Math.PI * 0.62}
-      minAzimuthAngle={-Math.PI * 0.42}
-      maxAzimuthAngle={Math.PI * 0.42}
+      minPolarAngle={fullOrbit ? Math.PI * 0.05 : Math.PI * 0.26}
+      maxPolarAngle={fullOrbit ? Math.PI * 0.85 : Math.PI * 0.62}
+      minAzimuthAngle={fullOrbit ? -Infinity : -Math.PI * 0.42}
+      maxAzimuthAngle={fullOrbit ? Infinity : Math.PI * 0.42}
       autoRotate={autoRotate}
       autoRotateSpeed={0.45}
       onStart={handleStart}

@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 import { Diorama } from "./Diorama";
+import { Model3D } from "./Model3D";
 import { Stage } from "./Stage";
 import { CameraRig } from "./CameraRig";
 import { PostFX } from "./PostFX";
@@ -11,6 +12,7 @@ import type { ExperienceAPI, Hotspot } from "../lib/types";
 
 type Props = {
   imageUrl: string;
+  modelUrl?: string;
   depthUrl?: string;
   normalUrl?: string;
   hotspots: Hotspot[];
@@ -22,13 +24,9 @@ type Props = {
   onFocusChange: (focused: boolean) => void;
 };
 
-/**
- * The WebGL surface. Mounted client-only (see HeritageExperience) so it
- * never runs during SSR. Atmospheric fog + a near-black background let
- * the lit diorama appear to float as a physical miniature.
- */
 export default function HeritageScene({
   imageUrl,
+  modelUrl,
   depthUrl,
   normalUrl,
   hotspots,
@@ -43,31 +41,41 @@ export default function HeritageScene({
     <Canvas
       shadows
       dpr={[1, 2]}
-      camera={{ position: [0, 0.4, 8.5], fov: 38, near: 0.1, far: 100 }}
+      camera={{ position: [0, 1.2, 8.5], fov: 38, near: 0.1, far: 100 }}
       gl={{
         antialias: true,
         toneMapping: THREE.ACESFilmicToneMapping,
-        toneMappingExposure: 1.05,
+        toneMappingExposure: 1.1,
       }}
       style={{ position: "absolute", inset: 0 }}
     >
       <color attach="background" args={["#0b0b0d"]} />
-      <fog attach="fog" args={["#0b0b0d", 11, 26]} />
+      <fog attach="fog" args={["#0b0b0d", 14, 30]} />
 
       <Suspense fallback={null}>
-        <Diorama
-          imageUrl={imageUrl}
-          depthUrl={depthUrl}
-          normalUrl={normalUrl}
-          hotspots={hotspots}
-          activeHotspot={activeHotspot}
-          onHotspotClick={onHotspotClick}
-        />
+        {modelUrl ? (
+          <Model3D
+            modelUrl={modelUrl}
+            hotspots={hotspots}
+            activeHotspot={activeHotspot}
+            onHotspotClick={onHotspotClick}
+          />
+        ) : (
+          <Diorama
+            imageUrl={imageUrl}
+            depthUrl={depthUrl}
+            normalUrl={normalUrl}
+            hotspots={hotspots}
+            activeHotspot={activeHotspot}
+            onHotspotClick={onHotspotClick}
+          />
+        )}
         <Stage />
       </Suspense>
 
       <CameraRig
         autoRotate={autoRotate}
+        fullOrbit={Boolean(modelUrl)}
         onReady={onReady}
         onFocusChange={onFocusChange}
       />

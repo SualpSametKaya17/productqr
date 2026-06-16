@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Viewer3D from "./viewer-3d";
 import HeritageExperience from "@/components/heritage/HeritageExperience";
-import { buildHotspots, getReliefMaps } from "@/components/heritage/lib/content";
+import { buildHotspots, getReliefMaps, getModelUrl } from "@/components/heritage/lib/content";
 
 /* ── Types ─────────────────────────────────────────────────────── */
 type Language   = { id: string; code: string; name: string; nativeName: string; isDefault: boolean };
@@ -474,6 +474,7 @@ export default function LandingPage({ product, translation, allLanguages, slug }
       {useHeritage && primaryImage ? (
         <HeritageExperience
           imageUrl={primaryImage.url}
+          modelUrl={getModelUrl(slug)}
           depthUrl={getReliefMaps(slug)?.depth}
           normalUrl={getReliefMaps(slug)?.normal}
           title={translation.title}
