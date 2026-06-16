@@ -5,89 +5,131 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
 const navLinks = [
-  { href: '/admin', label: 'Dashboard', icon: '▦' },
-  { href: '/admin/products', label: 'Products', icon: '◫' },
-  { href: '/admin/languages', label: 'Languages', icon: '◎' },
+  { href: '/admin', label: 'Dashboard', emoji: '📊' },
+  { href: '/admin/products', label: 'Ürünler', emoji: '📦' },
+  { href: '/admin/languages', label: 'Diller', emoji: '🌐' },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const isActive = (href: string) => {
-    if (href === '/admin') return pathname === '/admin';
-    return pathname.startsWith(href);
-  };
+  const isActive = (href: string) =>
+    href === '/admin' ? pathname === '/admin' : pathname.startsWith(href);
 
   return (
-    <div className="flex h-full min-h-screen bg-gray-100">
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#f1f5f9', color: '#0f172a' }}>
+
       {/* Mobile overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 z-20 bg-black/50 lg:hidden"
           onClick={() => setSidebarOpen(false)}
+          style={{
+            position: 'fixed', inset: 0, zIndex: 20,
+            background: 'rgba(0,0,0,0.5)',
+            display: 'block',
+          }}
+          className="lg:hidden"
         />
       )}
 
-      {/* Sidebar */}
-      <aside
-        className={`
-          fixed inset-y-0 left-0 z-30 w-60 flex-shrink-0 bg-slate-800 text-white flex flex-col
-          transform transition-transform duration-200 ease-in-out
-          ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          lg:relative lg:translate-x-0 lg:flex
-        `}
+      {/* ── Sidebar ── */}
+      <aside style={{
+        position: 'fixed',
+        top: 0, left: 0, bottom: 0,
+        width: 240,
+        background: '#1e293b',
+        color: '#f8fafc',
+        display: 'flex',
+        flexDirection: 'column',
+        zIndex: 30,
+        transform: sidebarOpen ? 'translateX(0)' : 'translateX(-100%)',
+        transition: 'transform 0.2s ease',
+      }}
+        className="lg:translate-x-0 lg:relative lg:flex"
       >
-        {/* Logo / Header */}
-        <div className="flex items-center gap-2 px-5 py-5 border-b border-slate-700">
-          <span className="text-blue-400 text-xl">⬡</span>
-          <span className="font-semibold text-sm tracking-wide text-white">ProductQR Admin</span>
+        {/* Brand */}
+        <div style={{
+          padding: '1.25rem 1.5rem',
+          borderBottom: '1px solid #334155',
+          display: 'flex', alignItems: 'center', gap: '0.6rem',
+        }}>
+          <span style={{ fontSize: '1.4rem' }}>🔲</span>
+          <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#f8fafc', letterSpacing: '0.02em' }}>
+            ProductQR Admin
+          </span>
         </div>
 
-        {/* Nav links */}
-        <nav className="flex-1 px-3 py-4 space-y-1">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setSidebarOpen(false)}
-              className={`
-                flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors
-                ${isActive(link.href)
-                  ? 'bg-slate-700 text-white'
-                  : 'text-slate-300 hover:bg-slate-700 hover:text-white'}
-              `}
-            >
-              <span className="text-base opacity-70">{link.icon}</span>
-              {link.label}
-            </Link>
-          ))}
+        {/* Navigation */}
+        <nav style={{ flex: 1, padding: '0.75rem' }}>
+          {navLinks.map(link => {
+            const active = isActive(link.href);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setSidebarOpen(false)}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  padding: '0.6rem 0.75rem',
+                  borderRadius: 8,
+                  marginBottom: 2,
+                  background: active ? '#334155' : 'transparent',
+                  color: active ? '#f8fafc' : '#94a3b8',
+                  fontWeight: active ? 600 : 400,
+                  fontSize: '0.9rem',
+                  textDecoration: 'none',
+                  transition: 'all 0.15s',
+                }}
+              >
+                <span style={{ fontSize: '1rem' }}>{link.emoji}</span>
+                {link.label}
+              </Link>
+            );
+          })}
         </nav>
 
         {/* Footer */}
-        <div className="px-5 py-4 border-t border-slate-700">
-          <p className="text-xs text-slate-500">ProductQR v1.0</p>
+        <div style={{ padding: '1rem 1.5rem', borderTop: '1px solid #334155' }}>
+          <p style={{ fontSize: '0.75rem', color: '#475569', margin: 0 }}>ProductQR v1.0</p>
         </div>
       </aside>
 
-      {/* Main content */}
-      <div className="flex-1 flex flex-col min-w-0">
+      {/* ── Main content ── */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}
+        className="lg:ml-60"
+      >
         {/* Mobile topbar */}
-        <header className="lg:hidden flex items-center gap-3 bg-slate-800 text-white px-4 py-3">
+        <header
+          className="lg:hidden"
+          style={{
+            background: '#1e293b',
+            color: '#f8fafc',
+            padding: '0.75rem 1rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.75rem',
+          }}
+        >
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-1 rounded hover:bg-slate-700 transition-colors"
-            aria-label="Open sidebar"
+            style={{
+              background: 'none', border: 'none',
+              color: '#f8fafc', cursor: 'pointer', padding: 4,
+            }}
+            aria-label="Menüyü aç"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <span className="font-semibold text-sm">ProductQR Admin</span>
+          <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>ProductQR Admin</span>
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-auto p-6">
+        <main style={{ flex: 1, padding: '1.5rem', overflowAuto: 'auto' } as React.CSSProperties}>
           {children}
         </main>
       </div>

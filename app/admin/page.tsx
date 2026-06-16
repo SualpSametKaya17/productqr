@@ -3,14 +3,14 @@ import Link from 'next/link';
 async function getStats() {
   try {
     const base = process.env.NEXT_PUBLIC_BASE_URL ?? 'http://localhost:3000';
-    const [productsRes, languagesRes] = await Promise.all([
+    const [pr, lr] = await Promise.all([
       fetch(`${base}/api/admin/products`, { cache: 'no-store' }),
       fetch(`${base}/api/admin/languages`, { cache: 'no-store' }),
     ]);
-    const products = productsRes.ok ? await productsRes.json() : [];
-    const languages = languagesRes.ok ? await languagesRes.json() : [];
+    const products  = pr.ok ? await pr.json() : [];
+    const languages = lr.ok ? await lr.json() : [];
     return {
-      totalProducts: Array.isArray(products) ? products.length : 0,
+      totalProducts:  Array.isArray(products)  ? products.length  : 0,
       totalLanguages: Array.isArray(languages) ? languages.length : 0,
     };
   } catch {
@@ -21,48 +21,84 @@ async function getStats() {
 export default async function AdminDashboard() {
   const stats = await getStats();
 
+  const card: React.CSSProperties = {
+    background: '#fff',
+    border: '1px solid #e2e8f0',
+    borderRadius: 12,
+    padding: '1.5rem',
+  };
+
+  const statNum: React.CSSProperties = {
+    fontSize: '2.5rem',
+    fontWeight: 800,
+    color: '#0f172a',
+    lineHeight: 1,
+    margin: '0.5rem 0 0.25rem',
+  };
+
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">ProductQR Admin</h1>
-        <p className="mt-1 text-sm text-gray-500">Manage your multilingual product QR pages</p>
+    <div style={{ maxWidth: 860, margin: '0 auto' }}>
+      <div style={{ marginBottom: '2rem' }}>
+        <h1 style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', margin: 0 }}>
+          ProductQR Admin
+        </h1>
+        <p style={{ color: '#64748b', fontSize: '0.9rem', marginTop: 4 }}>
+          Çok dilli ürün QR sayfalarınızı yönetin
+        </p>
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Products</p>
-          <p className="mt-2 text-4xl font-bold text-gray-900">{stats.totalProducts}</p>
-          <p className="mt-1 text-xs text-gray-400">Active product pages</p>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+        <div style={card}>
+          <p style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>
+            Toplam Ürün
+          </p>
+          <p style={statNum}>{stats.totalProducts}</p>
+          <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: 0 }}>Aktif ürün sayfaları</p>
         </div>
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <p className="text-sm font-medium text-gray-500 uppercase tracking-wide">Total Languages</p>
-          <p className="mt-2 text-4xl font-bold text-gray-900">{stats.totalLanguages}</p>
-          <p className="mt-1 text-xs text-gray-400">Configured languages</p>
+        <div style={card}>
+          <p style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', margin: 0 }}>
+            Toplam Dil
+          </p>
+          <p style={statNum}>{stats.totalLanguages}</p>
+          <p style={{ fontSize: '0.78rem', color: '#94a3b8', margin: 0 }}>Tanımlı diller</p>
         </div>
       </div>
 
       {/* Quick links */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
-        <h2 className="text-base font-semibold text-gray-800 mb-4">Quick Actions</h2>
-        <div className="flex flex-wrap gap-3">
-          <Link
-            href="/admin/products/new"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
-          >
-            + Add Product
+      <div style={card}>
+        <h2 style={{ fontSize: '1rem', fontWeight: 700, color: '#0f172a', marginTop: 0, marginBottom: '1rem' }}>
+          Hızlı Eylemler
+        </h2>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <Link href="/admin/products/new" style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '0.55rem 1.1rem',
+            background: '#2563eb', color: '#fff',
+            fontWeight: 600, fontSize: '0.875rem',
+            borderRadius: 8, textDecoration: 'none',
+          }}>
+            + Yeni Ürün
           </Link>
-          <Link
-            href="/admin/products"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50 transition-colors"
-          >
-            Manage Products
+          <Link href="/admin/products" style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '0.55rem 1.1rem',
+            background: '#fff', color: '#0f172a',
+            fontWeight: 600, fontSize: '0.875rem',
+            border: '1px solid #e2e8f0',
+            borderRadius: 8, textDecoration: 'none',
+          }}>
+            📦 Ürünleri Yönet
           </Link>
-          <Link
-            href="/admin/languages"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 text-sm font-medium rounded-md hover:bg-gray-50 transition-colors"
-          >
-            Manage Languages
+          <Link href="/admin/languages" style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '0.55rem 1.1rem',
+            background: '#fff', color: '#0f172a',
+            fontWeight: 600, fontSize: '0.875rem',
+            border: '1px solid #e2e8f0',
+            borderRadius: 8, textDecoration: 'none',
+          }}>
+            🌐 Dilleri Yönet
           </Link>
         </div>
       </div>
