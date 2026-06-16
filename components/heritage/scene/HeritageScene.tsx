@@ -6,6 +6,7 @@ import { AdaptiveDpr, AdaptiveEvents, Preload } from "@react-three/drei";
 import * as THREE from "three";
 import { Diorama } from "./Diorama";
 import { Model3D } from "./Model3D";
+import { ModelErrorBoundary } from "./ModelErrorBoundary";
 import { Stage } from "./Stage";
 import { CameraRig } from "./CameraRig";
 import { PostFX } from "./PostFX";
@@ -56,12 +57,14 @@ export default function HeritageScene({
 
       <Suspense fallback={null}>
         {modelUrl ? (
-          <Model3D
-            modelUrl={modelUrl}
-            hotspots={hotspots}
-            activeHotspot={activeHotspot}
-            onHotspotClick={onHotspotClick}
-          />
+          <ModelErrorBoundary>
+            <Model3D
+              modelUrl={modelUrl}
+              hotspots={hotspots}
+              activeHotspot={activeHotspot}
+              onHotspotClick={onHotspotClick}
+            />
+          </ModelErrorBoundary>
         ) : (
           <Diorama
             imageUrl={imageUrl}

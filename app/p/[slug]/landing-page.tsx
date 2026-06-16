@@ -405,9 +405,11 @@ export default function LandingPage({ product, translation, allLanguages, slug }
   // CSS-3D fallback model shown inside the viewer when no photo is uploaded
   const fallbackModel = isGate ? <Gate3D /> : isColumn ? <Column3D /> : null;
 
-  // Premium WebGL heritage experience requires a real photo to display.
+  // Premium WebGL heritage experience: shown when there is either a 3D
+  // model registered for this slug, or at least one photo to display.
   const primaryImage = images.find(i => i.isPrimary) ?? images[0] ?? null;
-  const useHeritage  = Boolean(primaryImage);
+  const modelUrl     = getModelUrl(slug);
+  const useHeritage  = Boolean(modelUrl) || Boolean(primaryImage);
 
   const switchLang = (code: string) =>
     router.push(`/p/${slug}?lang=${code}`, { scroll: false });
@@ -471,10 +473,10 @@ export default function LandingPage({ product, translation, allLanguages, slug }
           HERO — premium WebGL heritage experience
           (falls back to the CSS-3D viewer when no photo exists)
           ════════════════════════════════════════ */}
-      {useHeritage && primaryImage ? (
+      {useHeritage ? (
         <HeritageExperience
-          imageUrl={primaryImage.url}
-          modelUrl={getModelUrl(slug)}
+          imageUrl={primaryImage?.url ?? ""}
+          modelUrl={modelUrl}
           depthUrl={getReliefMaps(slug)?.depth}
           normalUrl={getReliefMaps(slug)?.normal}
           title={translation.title}

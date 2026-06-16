@@ -119,6 +119,7 @@ const CONTENT: SlugMap = {
  */
 export const MODELS: Record<string, string> = {
   "lefkosa-dikilitas": "/models/lefkosa-dikilitas.glb",
+  "girne-kapisi": "/models/girne-kapisi.glb",
 };
 
 export function getModelUrl(slug: string): string | undefined {
