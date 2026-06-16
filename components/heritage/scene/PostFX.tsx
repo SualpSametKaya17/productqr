@@ -36,11 +36,14 @@ export function PostFX({ focused }: Props) {
     effects.splice(
       1,
       0,
+      // Lock focus onto the monument center so it stays sharp; only the
+      // far background / near foreground get a gentle bokeh.
       <DepthOfField
         key="dof"
-        focusDistance={0.012}
-        focalLength={0.05}
-        bokehScale={3.2}
+        target={[0, 0.7, 0]}
+        worldFocusRange={6}
+        focalLength={0.025}
+        bokehScale={1.4}
       />
     );
   }
