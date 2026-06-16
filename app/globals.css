@@ -8,8 +8,6 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -24,3 +22,95 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ─── Landing Page Animations ─────────────────────────────────── */
+
+@keyframes lp-gradient {
+  0%, 100% { background-position: 0% 50%; }
+  50%       { background-position: 100% 50%; }
+}
+
+@keyframes lp-orb-a {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.18; }
+  33%      { transform: translate(40px, -50px) scale(1.15); opacity: 0.25; }
+  66%      { transform: translate(-20px, 30px) scale(0.88); opacity: 0.12; }
+}
+@keyframes lp-orb-b {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.14; }
+  40%      { transform: translate(-35px, 40px) scale(1.1); opacity: 0.2; }
+  75%      { transform: translate(25px, -20px) scale(0.92); opacity: 0.1; }
+}
+@keyframes lp-orb-c {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.1; }
+  50%      { transform: translate(20px, 30px) scale(1.2); opacity: 0.18; }
+}
+
+@keyframes lp-shimmer {
+  0%, 100% { box-shadow: 0 0 25px rgba(201,168,76,0.25); }
+  50%       { box-shadow: 0 0 50px rgba(201,168,76,0.55), 0 0 100px rgba(201,168,76,0.15); }
+}
+
+@keyframes lp-scroll-bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); opacity: 0.7; }
+  50%       { transform: translateX(-50%) translateY(10px); opacity: 1; }
+}
+
+@keyframes lp-line-grow {
+  from { width: 0; opacity: 0; }
+  to   { width: 60px; opacity: 1; }
+}
+
+@keyframes lp-fade-up {
+  from { opacity: 0; transform: translateY(32px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes lp-rotate-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes lp-star-pulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50%       { opacity: 1; transform: scale(1.3); }
+}
+
+/* Utility classes used by landing page */
+.lp-bg         { animation: lp-gradient 20s ease infinite; background-size: 400% 400%; }
+.lp-orb-a      { animation: lp-orb-a 14s ease-in-out infinite; }
+.lp-orb-b      { animation: lp-orb-b 10s ease-in-out infinite; }
+.lp-orb-c      { animation: lp-orb-c 18s ease-in-out 3s infinite; }
+.lp-shimmer    { animation: lp-shimmer 4s ease-in-out infinite; }
+.lp-scroll     { animation: lp-scroll-bounce 2s ease-in-out infinite; }
+.lp-line       { animation: lp-line-grow 1s ease forwards; }
+.lp-fade-up    { animation: lp-fade-up 0.9s ease forwards; }
+.lp-rotate     { animation: lp-rotate-slow 20s linear infinite; }
+.lp-star       { animation: lp-star-pulse 2s ease-in-out infinite; }
+
+.lp-card-3d {
+  transform: perspective(1200px) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
+  transition: transform 0.25s ease;
+  will-change: transform;
+}
+
+.lp-timeline-card {
+  transform: perspective(700px) rotateY(-4deg);
+  transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
+}
+.lp-timeline-card:hover {
+  transform: perspective(700px) rotateY(0deg) translateZ(20px);
+  box-shadow: 0 24px 60px rgba(0,0,0,0.55), 0 0 35px rgba(201,168,76,0.18);
+  border-color: rgba(201,168,76,0.55) !important;
+}
+
+.lp-image-thumb {
+  transform: perspective(400px) scale(1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.lp-image-thumb:hover {
+  transform: perspective(400px) scale(1.05) translateZ(10px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+}
+
+/* Prevent layout flash */
+.lp-root { font-family: Georgia, 'Times New Roman', serif; }
