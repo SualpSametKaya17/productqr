@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import { getModelUrl } from "@/components/heritage/lib/content";
@@ -468,19 +468,8 @@ export default function LandingPage({ translation, allLanguages, slug }: Props) 
   const switchLang = (code: string) =>
     router.push(`/p/${slug}?lang=${code}`, { scroll: false });
 
-  const [bibloVisible,   setBibloVisible]   = useState(false);
-  const [bibloDismissed, setBibloDismissed] = useState(false);
-
-  useEffect(() => {
-    if (bibloDismissed) return;
-    const onScroll = () => {
-      const past = window.scrollY > window.innerHeight * 0.35;
-      setBibloVisible(past && !bibloDismissed);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [bibloDismissed]);
+  // Biblo card stays open from the start; user can still dismiss it.
+  const [bibloVisible, setBibloVisible] = useState(true);
 
   return (
     <main style={{ background: "#faf7f2", minHeight: "100vh", WebkitFontSmoothing: "antialiased" }}>
@@ -524,7 +513,7 @@ export default function LandingPage({ translation, allLanguages, slug }: Props) 
       {/* ════════════════════════════════════════
           TOP SPACER — clears the fixed language bar
           ════════════════════════════════════════ */}
-      <div style={{ height: "clamp(4.5rem, 12vh, 7rem)" }} />
+      <div style={{ height: "clamp(2rem, 5vh, 3.25rem)" }} />
 
       {/* ════════════════════════════════════════
           ORNAMENTAL FRAME — wraps title + story + timeline
@@ -661,7 +650,7 @@ export default function LandingPage({ translation, allLanguages, slug }: Props) 
         modelUrl={modelUrl}
         title={translation.title}
         visible={bibloVisible}
-        onClose={() => { setBibloDismissed(true); setBibloVisible(false); }}
+        onClose={() => setBibloVisible(false)}
       />
     </main>
   );
